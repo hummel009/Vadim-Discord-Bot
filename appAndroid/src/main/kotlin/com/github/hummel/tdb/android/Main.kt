@@ -161,7 +161,9 @@ class Main : ComponentActivity() {
 }
 
 @Suppress("RedundantSuppression", "unused")
-fun launchWithData(discordToken: String, telegramToken: String, ownerId: String, root: String, context: ComponentActivity) {
+fun launchWithData(
+	discordToken: String, telegramToken: String, ownerId: String, root: String, context: ComponentActivity
+) {
 	BotData.discordToken = discordToken
 	BotData.telegramToken = telegramToken
 	BotData.ownerId = ownerId

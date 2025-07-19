@@ -42,3 +42,9 @@ java {
 		languageVersion = JavaLanguageVersion.of(17)
 	}
 }
+
+tasks {
+	withType<Jar>().configureEach {
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	}
+}
