@@ -13,8 +13,8 @@
 [![Technical Debt][technical_debt_badge]][technical_debt_link]
 [![Lines of Code][lines_of_code_badge]][lines_of_code_link]
 
-Discord bot that works not only on Windows/Linux, but also on Android. Has lots of features, e.g. birthday wishes,
-communication via AI and so on.
+Discord bot that connects chat in Telegram with channel in Discord, resending all messages in two sides. Works not only
+on Windows/Linux, but also on Android.
 
 </div>
 
