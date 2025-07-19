@@ -6,19 +6,20 @@ dependencies {
 	implementation("net.lingala.zip4j:zip4j:latest.release")
 	implementation("com.google.code.gson:gson:latest.release")
 	implementation("org.apache.httpcomponents.client5:httpclient5:latest.release")
-	implementation("net.dv8tion:JDA:latest.release")
-	implementation("org.telegram:telegrambots-longpolling:latest.release")
-	implementation("org.telegram:telegrambots-client:latest.release")
+	implementation("net.dv8tion:JDA:latest.release") {
+		exclude("com.squareup.okhttp3")
+	}
+	implementation("org.telegram:telegrambots-longpolling:latest.release") {
+		exclude("com.squareup.okhttp3")
+	}
+	implementation("org.telegram:telegrambots-client:latest.release") {
+		exclude("com.squareup.okhttp3")
+	}
+	implementation("com.squareup.okhttp3:okhttp:latest.release")
 }
 
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(17)
-	}
-}
-
-tasks {
-	jar {
-		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	}
 }
