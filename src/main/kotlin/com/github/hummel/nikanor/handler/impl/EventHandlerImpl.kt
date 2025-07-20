@@ -23,6 +23,7 @@ class EventHandlerImpl : ListenerAdapter() {
 		managerService.setDiscordChannel(event)
 		managerService.setTelegramChat(event)
 		managerService.commit(event)
+		managerService.uncommit(event)
 
 		managerService.wipeData(event)
 
