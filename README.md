@@ -1,7 +1,3 @@
-<div align = "center">
-
-![Logo]
-
 [![Code Smells][code_smells_badge]][code_smells_link]
 [![Maintainability Rating][maintainability_rating_badge]][maintainability_rating_link]
 [![Security Rating][security_rating_badge]][security_rating_link]
@@ -13,51 +9,52 @@
 [![Technical Debt][technical_debt_badge]][technical_debt_link]
 [![Lines of Code][lines_of_code_badge]][lines_of_code_link]
 
-Discord bot that connects chat in Telegram with channel in Discord, resending all messages in two sides. Works not only
-on Windows/Linux, but also on Android.
+My discord bot for my discord servers. His name is Никанор (Nikanor). Key features:
 
-</div>
+* Four languages of interface: english, russian, belarusian and ukrainian.
+* Connecting one discord channel with one telegram chat. Bot will be transferring all messages from first to second and
+  vice versa.
+* Adding bot manager roles to allow not only admins change upper settings.
+* Server data can be deleted by admins and manager roles, if you are concerned about your privacy.
 
 <!----------------------------------------------------------------------------->
 
-[Logo]: appAndroid/src/main/res/mipmap-xxxhdpi/tdb.png
+[code_smells_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=code_smells
 
-[code_smells_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Telegram-Discord-Bot&metric=code_smells
+[code_smells_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
 
-[code_smells_link]: https://sonarcloud.io/summary/overall?id=hummel009_Telegram-Discord-Bot
+[maintainability_rating_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=sqale_rating
 
-[maintainability_rating_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Telegram-Discord-Bot&metric=sqale_rating
+[maintainability_rating_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
 
-[maintainability_rating_link]: https://sonarcloud.io/summary/overall?id=hummel009_Telegram-Discord-Bot
+[security_rating_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=security_rating
 
-[security_rating_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Telegram-Discord-Bot&metric=security_rating
+[security_rating_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
 
-[security_rating_link]: https://sonarcloud.io/summary/overall?id=hummel009_Telegram-Discord-Bot
+[bugs_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=bugs
 
-[bugs_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Telegram-Discord-Bot&metric=bugs
+[bugs_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
 
-[bugs_link]: https://sonarcloud.io/summary/overall?id=hummel009_Telegram-Discord-Bot
+[vulnerabilities_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=vulnerabilities
 
-[vulnerabilities_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Telegram-Discord-Bot&metric=vulnerabilities
+[vulnerabilities_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
 
-[vulnerabilities_link]: https://sonarcloud.io/summary/overall?id=hummel009_Telegram-Discord-Bot
+[duplicated_lines_density_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=duplicated_lines_density
 
-[duplicated_lines_density_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Telegram-Discord-Bot&metric=duplicated_lines_density
+[duplicated_lines_density_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
 
-[duplicated_lines_density_link]: https://sonarcloud.io/summary/overall?id=hummel009_Telegram-Discord-Bot
+[reliability_rating_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=reliability_rating
 
-[reliability_rating_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Telegram-Discord-Bot&metric=reliability_rating
+[reliability_rating_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
 
-[reliability_rating_link]: https://sonarcloud.io/summary/overall?id=hummel009_Telegram-Discord-Bot
+[quality_gate_status_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=alert_status
 
-[quality_gate_status_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Telegram-Discord-Bot&metric=alert_status
+[quality_gate_status_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
 
-[quality_gate_status_link]: https://sonarcloud.io/summary/overall?id=hummel009_Telegram-Discord-Bot
+[technical_debt_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=sqale_index
 
-[technical_debt_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Telegram-Discord-Bot&metric=sqale_index
+[technical_debt_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
 
-[technical_debt_link]: https://sonarcloud.io/summary/overall?id=hummel009_Telegram-Discord-Bot
+[lines_of_code_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=ncloc
 
-[lines_of_code_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Telegram-Discord-Bot&metric=ncloc
-
-[lines_of_code_link]: https://sonarcloud.io/summary/overall?id=hummel009_Telegram-Discord-Bot
+[lines_of_code_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
