@@ -239,6 +239,43 @@ class ManagerServiceImpl : ManagerService {
 		}
 	}
 
+	override fun uncommit(event: SlashCommandInteractionEvent) {
+		if (event.fullCommandName != "uncommit") {
+			return
+		}
+
+		event.deferReply().queue {
+			val guild = event.guild ?: return@queue
+			val guildData = dataService.loadGuildData(guild)
+			val busRegistry = dataService.loadBusRegistry()
+
+			val embed = if (!accessService.fromManagerAtLeast(event, guildData)) {
+				EmbedBuilder().access(event.member, guildData, I18n.of("msg_access", guildData))
+			} else {
+				try {
+					if (guildData.discordChannelId == 0L) {
+						throw Exception()
+					}
+					if (guildData.telegramChatId == 0L) {
+						throw Exception()
+					}
+
+					busRegistry.discordBus.remove(guildData.discordChannelId, guildData.telegramChatId)
+					busRegistry.telegramBus.remove(guildData.telegramChatId, guildData.discordChannelId)
+
+					EmbedBuilder().success(
+						event.member, guildData, I18n.of("uncommit", guildData)
+					)
+				} catch (_: Exception) {
+					EmbedBuilder().error(event.member, guildData, I18n.of("msg_error_format", guildData))
+				}
+			}
+			dataService.saveBusRegistry(busRegistry)
+
+			event.hook.sendMessageEmbeds(embed).queue()
+		}
+	}
+
 	override fun wipeData(event: SlashCommandInteractionEvent) {
 		if (event.fullCommandName != "wipe_data") {
 			return

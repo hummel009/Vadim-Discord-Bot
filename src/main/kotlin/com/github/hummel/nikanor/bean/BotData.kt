@@ -5,5 +5,4 @@ object BotData {
 	lateinit var discordToken: String
 	lateinit var telegramToken: String
 	lateinit var ownerId: String
-	lateinit var exitFunction: () -> Unit
 }

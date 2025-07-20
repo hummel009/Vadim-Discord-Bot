@@ -12,6 +12,7 @@
 	"set_discord_channel": "Discord channel has been set: %d.",
 	"set_telegram_chat": "Telegram chat has been set: %d.",
 	"commit": "Connection bus has been updated.",
+	"uncommit": "Connection bus has been updated.",
 	"wipe_data": "Server data has been cleared.",
 	"import": "Data has been imported.",
 	"exit": "Application will be turned off.",

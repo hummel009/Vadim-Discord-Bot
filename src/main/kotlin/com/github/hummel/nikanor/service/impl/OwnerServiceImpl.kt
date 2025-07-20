@@ -1,6 +1,5 @@
 package com.github.hummel.nikanor.service.impl
 
-import com.github.hummel.nikanor.bean.BotData
 import com.github.hummel.nikanor.factory.ServiceFactory
 import com.github.hummel.nikanor.service.AccessService
 import com.github.hummel.nikanor.service.DataService
@@ -13,6 +12,7 @@ import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.utils.FileProxy
 import net.dv8tion.jda.api.utils.FileUpload
+import kotlin.system.exitProcess
 
 class OwnerServiceImpl : OwnerService {
 	private val dataService: DataService = ServiceFactory.dataService
@@ -94,7 +94,7 @@ class OwnerServiceImpl : OwnerService {
 				val embed = EmbedBuilder().success(event.member, guildData, I18n.of("exit", guildData))
 
 				event.hook.sendMessageEmbeds(embed).queue {
-					BotData.exitFunction.invoke()
+					exitProcess(0)
 				}
 			}
 		}

@@ -9,5 +9,6 @@ interface ManagerService {
 	fun setDiscordChannel(event: SlashCommandInteractionEvent)
 	fun setTelegramChat(event: SlashCommandInteractionEvent)
 	fun commit(event: SlashCommandInteractionEvent)
+	fun uncommit(event: SlashCommandInteractionEvent)
 	fun wipeData(event: SlashCommandInteractionEvent)
 }

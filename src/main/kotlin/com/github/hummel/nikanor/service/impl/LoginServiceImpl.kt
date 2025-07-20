@@ -57,6 +57,7 @@ class LoginServiceImpl : LoginService {
 			"set_discord_channel".cmd("/set_discord_channel [channel_id]", string()),
 			"set_telegram_chat".cmd("/set_telegram_chat [chat_id]", string()),
 			"commit".cmd("/commit", empty()),
+			"uncommit".cmd("/uncommit", empty()),
 
 			"wipe_data".cmd("/wipe_data", empty()),
 
