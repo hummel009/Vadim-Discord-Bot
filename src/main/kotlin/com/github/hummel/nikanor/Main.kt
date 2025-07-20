@@ -52,9 +52,7 @@ fun requestUserInput() {
 }
 
 @Suppress("UNUSED_PARAMETER")
-fun launchWithData(
-	config: Config, root: String
-) {
+fun launchWithData(config: Config, root: String) {
 	BotData.discordToken = config.discordToken
 	BotData.telegramToken = config.telegramToken
 	BotData.ownerId = config.ownerId
