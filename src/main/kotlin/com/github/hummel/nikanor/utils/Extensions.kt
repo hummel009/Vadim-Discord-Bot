@@ -37,13 +37,19 @@ fun EmbedBuilder.success(member: Member?, guildData: GuildData, desc: String): M
 	setColor(0x00FF00)
 }.build()
 
-fun ByteArray.resizeImage(size: Int): ByteArray {
+fun ByteArray.resizeImage(width: Int = 160): ByteArray {
 	val inputStream = ByteArrayInputStream(this)
 	val originalImage = ImageIO.read(inputStream)
 
-	val resizedImage = BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB)
+	val originalWidth = originalImage.width
+	val originalHeight = originalImage.height
+
+	val newWidth = width
+	val newHeight = (originalHeight.toDouble() / originalWidth.toDouble() * newWidth).toInt()
+
+	val resizedImage = BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB)
 	val graphics2D = resizedImage.createGraphics()
-	graphics2D.drawImage(originalImage.getScaledInstance(size, size, Image.SCALE_SMOOTH), 0, 0, null)
+	graphics2D.drawImage(originalImage.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH), 0, 0, null)
 	graphics2D.dispose()
 
 	val outputStream = ByteArrayOutputStream()
