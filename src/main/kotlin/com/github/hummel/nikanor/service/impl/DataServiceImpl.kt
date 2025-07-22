@@ -30,7 +30,9 @@ class DataServiceImpl : DataService {
 
 	override fun loadBusRegistry(): BusRegistry {
 		val filePath = "guilds/bus.json"
-		return jsonDao.readFromFile(filePath, BusRegistry::class.java) ?: BusRegistry(mutableMapOf(), mutableMapOf())
+		return jsonDao.readFromFile(filePath, BusRegistry::class.java) ?: BusRegistry(
+			mutableMapOf(), mutableMapOf(), mutableMapOf()
+		)
 	}
 
 	override fun saveBusRegistry(busRegistry: BusRegistry) {

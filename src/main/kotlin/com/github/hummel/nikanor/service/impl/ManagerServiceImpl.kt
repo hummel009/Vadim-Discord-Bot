@@ -216,23 +216,26 @@ class ManagerServiceImpl : ManagerService {
 				EmbedBuilder().access(event.member, guildData, I18n.of("msg_access", guildData))
 			} else {
 				try {
+					if (busRegistry.ownership.contains(guild.idLong)) {
+						throw Exception()
+					}
+
 					if (guildData.discordChannelId == 0L || guildData.telegramChatId == 0L) {
 						throw Exception()
 					}
 
-					val registries = listOf(
-						busRegistry.discordBus.keys,
-						busRegistry.discordBus.values,
-						busRegistry.telegramBus.keys,
-						busRegistry.telegramBus.values
-					)
+					val rule1 = !busRegistry.discordToTelegram.contains(guildData.discordChannelId)
+					val rule2 = !busRegistry.telegramToDiscord.contains(guildData.telegramChatId)
 
-					if (registries.any { it.contains(guildData.discordChannelId) || it.contains(guildData.telegramChatId) }) {
+					if (rule1 && rule2) {
+						busRegistry.discordToTelegram.put(guildData.discordChannelId, guildData.telegramChatId)
+						busRegistry.telegramToDiscord.put(guildData.telegramChatId, guildData.discordChannelId)
+						busRegistry.ownership.put(
+							guild.idLong, listOf(guildData.discordChannelId, guildData.telegramChatId)
+						)
+					} else {
 						throw Exception()
 					}
-
-					busRegistry.discordBus.put(guildData.discordChannelId, guildData.telegramChatId)
-					busRegistry.telegramBus.put(guildData.telegramChatId, guildData.discordChannelId)
 
 					EmbedBuilder().success(
 						event.member, guildData, I18n.of("commit", guildData)
@@ -261,12 +264,24 @@ class ManagerServiceImpl : ManagerService {
 				EmbedBuilder().access(event.member, guildData, I18n.of("msg_access", guildData))
 			} else {
 				try {
+					if (!busRegistry.ownership.contains(guild.idLong)) {
+						throw Exception()
+					}
+
 					if (guildData.discordChannelId == 0L || guildData.telegramChatId == 0L) {
 						throw Exception()
 					}
 
-					busRegistry.discordBus.remove(guildData.discordChannelId)
-					busRegistry.telegramBus.remove(guildData.telegramChatId)
+					val rule1 = busRegistry.ownership[guild.idLong]!!.contains(guildData.discordChannelId)
+					val rule2 = busRegistry.ownership[guild.idLong]!!.contains(guildData.telegramChatId)
+
+					if (rule1 && rule2) {
+						busRegistry.discordToTelegram.remove(guildData.discordChannelId)
+						busRegistry.telegramToDiscord.remove(guildData.telegramChatId)
+						busRegistry.ownership.remove(guild.idLong)
+					} else {
+						throw Exception()
+					}
 
 					EmbedBuilder().success(
 						event.member, guildData, I18n.of("uncommit", guildData)

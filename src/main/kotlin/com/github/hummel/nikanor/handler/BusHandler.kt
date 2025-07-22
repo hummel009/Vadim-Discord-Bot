@@ -34,10 +34,10 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 
 			val discordChannelId = event.channel.idLong
 			val busRegistry = dataService.loadBusRegistry()
-			if (!busRegistry.discordBus.contains(discordChannelId)) {
+			if (!busRegistry.discordToTelegram.contains(discordChannelId)) {
 				return
 			}
-			val telegramChatId = busRegistry.discordBus[discordChannelId]!!
+			val telegramChatId = busRegistry.discordToTelegram[discordChannelId]!!
 
 			Bridge.transferToTelegram(event, telegramChatId)
 		}
@@ -51,10 +51,10 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 
 			val telegramChatId = update.message.chatId
 			val busRegistry = dataService.loadBusRegistry()
-			if (!busRegistry.telegramBus.contains(telegramChatId)) {
+			if (!busRegistry.telegramToDiscord.contains(telegramChatId)) {
 				return
 			}
-			val discordChannelId = busRegistry.telegramBus[telegramChatId]!!
+			val discordChannelId = busRegistry.telegramToDiscord[telegramChatId]!!
 
 			Bridge.transferToDiscord(update, discordChannelId)
 		}
