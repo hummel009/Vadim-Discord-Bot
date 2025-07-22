@@ -216,10 +216,18 @@ class ManagerServiceImpl : ManagerService {
 				EmbedBuilder().access(event.member, guildData, I18n.of("msg_access", guildData))
 			} else {
 				try {
-					if (guildData.discordChannelId == 0L) {
+					if (guildData.discordChannelId == 0L || guildData.telegramChatId == 0L) {
 						throw Exception()
 					}
-					if (guildData.telegramChatId == 0L) {
+
+					val registries = listOf(
+						busRegistry.discordBus.keys,
+						busRegistry.discordBus.values,
+						busRegistry.telegramBus.keys,
+						busRegistry.telegramBus.values
+					)
+
+					if (registries.any { it.contains(guildData.discordChannelId) || it.contains(guildData.telegramChatId) }) {
 						throw Exception()
 					}
 
@@ -253,15 +261,12 @@ class ManagerServiceImpl : ManagerService {
 				EmbedBuilder().access(event.member, guildData, I18n.of("msg_access", guildData))
 			} else {
 				try {
-					if (guildData.discordChannelId == 0L) {
-						throw Exception()
-					}
-					if (guildData.telegramChatId == 0L) {
+					if (guildData.discordChannelId == 0L || guildData.telegramChatId == 0L) {
 						throw Exception()
 					}
 
-					busRegistry.discordBus.remove(guildData.discordChannelId, guildData.telegramChatId)
-					busRegistry.telegramBus.remove(guildData.telegramChatId, guildData.discordChannelId)
+					busRegistry.discordBus.remove(guildData.discordChannelId)
+					busRegistry.telegramBus.remove(guildData.telegramChatId)
 
 					EmbedBuilder().success(
 						event.member, guildData, I18n.of("uncommit", guildData)
