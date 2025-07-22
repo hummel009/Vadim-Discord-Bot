@@ -3,7 +3,7 @@ package com.github.hummel.nikanor.service.impl
 import com.github.hummel.nikanor.ApiHolder
 import com.github.hummel.nikanor.bean.BotData
 import com.github.hummel.nikanor.handler.BusHandler
-import com.github.hummel.nikanor.handler.impl.EventHandlerImpl
+import com.github.hummel.nikanor.handler.EventHandler
 import com.github.hummel.nikanor.service.LoginService
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.interactions.commands.OptionType
@@ -23,7 +23,7 @@ class LoginServiceImpl : LoginService {
 				enableIntents(GatewayIntent.getIntents(GatewayIntent.ALL_INTENTS))
 				enableCache(CacheFlag.entries)
 				setMemberCachePolicy(MemberCachePolicy.ALL)
-				addEventListeners(EventHandlerImpl(), BusHandler)
+				addEventListeners(EventHandler, BusHandler)
 			}.build().awaitReady()
 
 			if (reinit) {

@@ -1,4 +1,4 @@
-package com.github.hummel.nikanor.handler.impl
+package com.github.hummel.nikanor.handler
 
 import com.github.hummel.nikanor.factory.ServiceFactory
 import com.github.hummel.nikanor.service.ManagerService
@@ -7,7 +7,7 @@ import com.github.hummel.nikanor.service.OwnerService
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 
-class EventHandlerImpl : ListenerAdapter() {
+object EventHandler : ListenerAdapter() {
 	private val memberService: MemberService = ServiceFactory.memberService
 	private val managerService: ManagerService = ServiceFactory.managerService
 	private val ownerService: OwnerService = ServiceFactory.ownerService

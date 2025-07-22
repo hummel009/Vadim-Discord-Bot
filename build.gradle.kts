@@ -20,6 +20,7 @@ dependencies {
 	embed("net.dv8tion:JDA:latest.release")
 	embed("org.telegram:telegrambots-longpolling:latest.release")
 	embed("org.telegram:telegrambots-client:latest.release")
+	embed("org.sejda.imageio:webp-imageio:latest.release")
 
 	implementation("com.google.code.gson:gson:latest.release")
 	implementation("org.apache.httpcomponents.client5:httpclient5:latest.release")
@@ -27,6 +28,7 @@ dependencies {
 	implementation("net.dv8tion:JDA:latest.release")
 	implementation("org.telegram:telegrambots-longpolling:latest.release")
 	implementation("org.telegram:telegrambots-client:latest.release")
+	implementation("org.sejda.imageio:webp-imageio:latest.release")
 }
 
 java {

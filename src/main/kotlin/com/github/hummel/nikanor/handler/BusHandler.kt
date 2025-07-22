@@ -1,27 +1,31 @@
 package com.github.hummel.nikanor.handler
 
 import com.github.hummel.nikanor.ApiHolder
+import com.github.hummel.nikanor.bean.BotData
 import com.github.hummel.nikanor.factory.ServiceFactory
 import com.github.hummel.nikanor.service.DataService
+import com.github.hummel.nikanor.utils.resizeImage
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.EventListener
 import net.dv8tion.jda.api.utils.FileProxy
+import net.dv8tion.jda.api.utils.FileUpload
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer
-import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto
+import org.telegram.telegrambots.meta.api.methods.GetFile
+import org.telegram.telegrambots.meta.api.methods.send.*
 import org.telegram.telegrambots.meta.api.objects.InputFile
 import org.telegram.telegrambots.meta.api.objects.Update
-import org.telegram.telegrambots.meta.api.objects.media.InputMedia
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaAudio
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaDocument
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaVideo
 import java.io.File
+import java.net.URL
 import java.nio.file.Files
 
 object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 	private val dataService: DataService = ServiceFactory.dataService
 
-	// DISCORD
 	override fun onEvent(event: GenericEvent) {
 		if (event is MessageReceivedEvent) {
 			if (event.author.isBot) {
@@ -35,27 +39,12 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 			}
 			val telegramChatId = busRegistry.discordBus[discordChannelId]!!
 
-			val author = with(event.message.author.effectiveName) {
-				replace("  ", " ").replace(" ", "_")
-			}
-
-			if (DiscordBridge.tryForwardImageGroupWithText(event, author, telegramChatId)) {
-				return
-			}
-
-			if (DiscordBridge.tryForwardImageWithText(event, author, telegramChatId)) {
-				return
-			}
-
-			if (DiscordBridge.tryForwardText(event, author, telegramChatId)) {
-				return
-			}
+			Bridge.transferToTelegram(event, telegramChatId)
 		}
 	}
 
-	// TELEGRAM
 	override fun consume(update: Update) {
-		if (update.hasMessage() && update.message.hasText()) {
+		if (update.hasMessage()) {
 			if (update.message.from.isBot) {
 				return
 			}
@@ -67,153 +56,222 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 			}
 			val discordChannelId = busRegistry.telegramBus[telegramChatId]!!
 
-			val content = update.message.text
-			val author = with(update.message.from) {
-				(userName ?: listOfNotNull(firstName, lastName).joinToString("_")).replace("  ", " ").replace(" ", "_")
-			}
-			val isMultiline = content.contains("\n") || content.contains("\r")
-
-			val separator = if (isMultiline) "\n\n" else " "
-
-			val channel = ApiHolder.discord.getTextChannelById(
-				discordChannelId
-			) ?: ApiHolder.discord.getThreadChannelById(
-				discordChannelId
-			)
-
-			channel?.let { channel ->
-				val message = "__#${author}__:$separator$content"
-				channel.sendMessage(message).queue()
-			}
+			Bridge.transferToDiscord(update, discordChannelId)
 		}
 	}
 
-	object DiscordBridge {
-		fun tryForwardImageGroupWithText(
-			event: MessageReceivedEvent, author: String, telegramChatId: Long
-		): Boolean {
+	object Bridge {
+		fun transferToTelegram(event: MessageReceivedEvent, telegramChatId: Long) {
 			try {
 				val content = event.message.contentDisplay
-				val isMultiline = content.contains("\n") || content.contains("\r")
+				val separator = if (content.contains("\n") || content.contains("\r")) "\n\n" else " "
+				val author = with(event.message.author.effectiveName) {
+					replace("  ", " ").replace(" ", "_")
+				}
 
-				val separator = if (isMultiline) "\n\n" else " "
+				ApiHolder.telegram.execute(SendMessage.builder().apply {
+					chatId(telegramChatId)
+					text("#$author:$separator$content")
+				}.build())
 
 				val attachments = event.message.attachments
-				if (attachments.isEmpty()) {
-					return false
+				val stickers = event.message.stickers
+				if (attachments.isEmpty() && stickers.isEmpty()) {
+					return
 				}
 
-				val imageAttachments = attachments.filter { it.isImage }
-				if (imageAttachments.size < 2) {
-					return false
-				}
+				val images = mutableListOf<File>()
+				val videos = mutableListOf<File>()
+				val audios = mutableListOf<File>()
+				val gifs = mutableListOf<File>()
+				val documents = mutableListOf<File>()
 
-				val medias = mutableListOf<InputMedia>()
+				val tempDir = Files.createTempDirectory("discord_attachments_")
 				val tempFiles = mutableListOf<File>()
 
 				try {
-					for ((i, imageAttachment) in imageAttachments.withIndex()) {
-						val byteArray = FileProxy(imageAttachment.url).download().join().readBytes()
-						val tempFile = Files.createTempFile("telegram_photo_", imageAttachment.fileExtension).toFile()
+					for (attachment in attachments) {
+						if (attachment.size >= 5_000_000) {
+							continue
+						}
+						val byteArray = FileProxy(attachment.url).download().join().readBytes()
+						val tempFile = tempDir.resolve(attachment.fileName).toFile()
 						tempFile.writeBytes(byteArray)
 						tempFiles.add(tempFile)
 
-						val inputFile = InputMediaPhoto(tempFile, tempFile.name)
-						if (i == 0) {
-							inputFile.caption = "#$author:$separator$content"
+						when (attachment.fileExtension?.lowercase()) {
+							"jpg", "jpeg", "png" -> images.add(tempFile)
+							"mp4", "mov", "mpg", "mpeg" -> videos.add(tempFile)
+							"mp3", "wav", "ogg", "m4a" -> audios.add(tempFile)
+							"gif" -> gifs.add(tempFile)
+							else -> documents.add(tempFile)
 						}
-						medias.add(inputFile)
+					}
+					for (sticker in stickers) {
+						val url = sticker.iconUrl
+						if (url.contains(".json")) {
+							continue
+						}
+
+						val byteArray = URL(url).readBytes()
+						val extension = url.substringAfterLast('.', "").lowercase()
+						val fileName = "${sticker.id}.$extension"
+						val tempFile = tempDir.resolve(fileName).toFile()
+						tempFile.writeBytes(byteArray)
+						tempFiles.add(tempFile)
+
+						when (extension) {
+							"jpg", "jpeg", "png" -> images.add(tempFile)
+							"gif" -> gifs.add(tempFile)
+						}
 					}
 
-					val sendFunc = SendMediaGroup.builder().apply {
-						chatId(telegramChatId.toString())
-						medias(medias)
-					}.build()
+					if (images.size > 1) {
+						ApiHolder.telegram.execute(SendMediaGroup.builder().apply {
+							chatId(telegramChatId.toString())
+							medias(images.map {
+								InputMediaPhoto(it, it.name)
+							})
+						}.build())
+					} else if (images.size == 1) {
+						ApiHolder.telegram.execute(SendPhoto.builder().apply {
+							chatId(telegramChatId)
+							photo(InputFile(images[0]))
+						}.build())
+					}
 
-					ApiHolder.telegram.execute(sendFunc)
+					if (videos.size > 1) {
+						ApiHolder.telegram.execute(SendMediaGroup.builder().apply {
+							chatId(telegramChatId.toString())
+							medias(videos.map {
+								InputMediaVideo(it, it.name)
+							})
+						}.build())
+					} else if (videos.size == 1) {
+						ApiHolder.telegram.execute(SendVideo.builder().apply {
+							chatId(telegramChatId)
+							video(InputFile(videos[0]))
+						}.build())
+					}
+
+					if (audios.size > 1) {
+						ApiHolder.telegram.execute(SendMediaGroup.builder().apply {
+							chatId(telegramChatId.toString())
+							medias(audios.map {
+								InputMediaAudio(it, it.name)
+							})
+						}.build())
+					} else if (audios.size == 1) {
+						ApiHolder.telegram.execute(SendAudio.builder().apply {
+							chatId(telegramChatId)
+							audio(InputFile(audios[0]))
+						}.build())
+					}
+
+					if (documents.size > 1) {
+						ApiHolder.telegram.execute(SendMediaGroup.builder().apply {
+							chatId(telegramChatId.toString())
+							medias(documents.map {
+								InputMediaDocument(it, it.name)
+							})
+						}.build())
+					} else if (documents.size == 1) {
+						ApiHolder.telegram.execute(SendDocument.builder().apply {
+							chatId(telegramChatId)
+							document(InputFile(documents[0]))
+						}.build())
+					}
+
+					for (inputFile in gifs) {
+						ApiHolder.telegram.execute(SendAnimation.builder().apply {
+							chatId(telegramChatId)
+							animation(InputFile(inputFile))
+						}.build())
+					}
 				} catch (ex: Exception) {
 					ex.printStackTrace()
 				} finally {
 					tempFiles.forEach { it.delete() }
+					tempDir.toFile().delete()
 				}
-				return true
 			} catch (e: Exception) {
 				e.printStackTrace()
-
-				return false
 			}
 		}
 
-		fun tryForwardImageWithText(
-			event: MessageReceivedEvent, author: String, telegramChatId: Long
-		): Boolean {
+		fun transferToDiscord(update: Update, discordChannelId: Long) {
 			try {
-				val content = event.message.contentDisplay
-				val isMultiline = content.contains("\n") || content.contains("\r")
-
-				val separator = if (isMultiline) "\n\n" else " "
-
-				val attachments = event.message.attachments
-				if (attachments.isEmpty()) {
-					return false
+				val content = update.message.text ?: update.message.caption ?: ""
+				val separator = if (content.contains("\n") || content.contains("\r")) "\n\n" else " "
+				val author = with(update.message.from) {
+					(userName ?: listOfNotNull(firstName, lastName).joinToString("_")).replace("  ", " ")
+						.replace(" ", "_")
 				}
 
-				val imageAttachments = attachments.filter { it.isImage }
-				if (imageAttachments.size != 1) {
-					return false
+				val channel = ApiHolder.discord.getTextChannelById(
+					discordChannelId
+				) ?: ApiHolder.discord.getThreadChannelById(
+					discordChannelId
+				) ?: return
+
+				fun sendFile(fileId: String, fileName: String) {
+					val url = ApiHolder.telegram.execute(GetFile(fileId)).getFileUrl(BotData.telegramToken)
+					val byteArray = URL(url).readBytes()
+					channel.sendMessage("__#${author}__:$separator$content").apply {
+						addFiles(FileUpload.fromData(byteArray, fileName))
+						queue()
+					}
 				}
 
-				val tempFile = Files.createTempFile("telegram_photo_", imageAttachments[0].fileExtension).toFile()
+				when {
+					update.message.photo != null -> {
+						val photoSize = update.message.photo.last()
+						sendFile(photoSize.fileId, "photo.jpg")
+					}
 
-				try {
-					val byteArray = FileProxy(imageAttachments[0].url).download().join().readBytes()
-					tempFile.writeBytes(byteArray)
+					update.message.video != null -> {
+						val video = update.message.video
+						sendFile(video.fileId, video.fileName ?: "video.mp4")
+					}
 
-					val photo = InputFile(tempFile)
+					update.message.audio != null -> {
+						val audio = update.message.audio
+						sendFile(audio.fileId, audio.fileName ?: "audio.mp3")
+					}
 
-					val sendFunc = SendPhoto.builder().apply {
-						chatId(telegramChatId)
-						photo(photo)
-						caption("#$author:$separator$content")
-					}.build()
+					update.message.document != null -> {
+						val file = update.message.document
+						sendFile(file.fileId, file.fileName)
+					}
 
-					ApiHolder.telegram.execute(sendFunc)
-				} catch (e: Exception) {
-					e.printStackTrace()
+					update.message.animation != null -> {
+						val animation = update.message.animation
+						sendFile(animation.fileId, animation.fileName ?: "animation.gif")
+					}
 
-					return false
-				} finally {
-					tempFile.delete()
+					update.message.voice != null -> {
+						val voice = update.message.voice
+						sendFile(voice.fileId, "voice.ogg")
+					}
+
+					update.message.sticker != null -> {
+						val sticker = update.message.sticker
+						val url = ApiHolder.telegram.execute(GetFile(sticker.fileId)).getFileUrl(BotData.telegramToken)
+						val byteArray = URL(url).readBytes().resizeImage(160)
+						channel.sendMessage("__#${author}__:$separator$content").apply {
+							addFiles(FileUpload.fromData(byteArray, sticker.fileUniqueId + ".webp"))
+							queue()
+						}
+					}
+
+					else -> {
+						if (content.isNotBlank()) {
+							channel.sendMessage("__#${author}__:$separator$content").queue()
+						}
+					}
 				}
-				return true
 			} catch (e: Exception) {
 				e.printStackTrace()
-
-				return false
-			}
-		}
-
-		fun tryForwardText(
-			event: MessageReceivedEvent, author: String, telegramChatId: Long
-		): Boolean {
-			try {
-				val content = event.message.contentDisplay
-				val isMultiline = content.contains("\n") || content.contains("\r")
-
-				val separator = if (isMultiline) "\n\n" else " "
-
-				val sendFunc = SendMessage.builder().apply {
-					chatId(telegramChatId)
-					text("#$author:$separator$content")
-				}.build()
-
-				ApiHolder.telegram.execute(sendFunc)
-
-				return true
-			} catch (e: Exception) {
-				e.printStackTrace()
-
-				return false
 			}
 		}
 	}
