@@ -63,25 +63,44 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 	object Bridge {
 		fun transferToTelegram(event: MessageReceivedEvent, telegramChatId: Long) {
 			try {
+				val reference = event.message.referencedMessage
+				val referenceId = reference?.contentDisplay?.takeIf {
+					it.contains("[&") && it.contains("]")
+				}?.substringAfter("[&")?.substringBefore("]")
+
+				val ownSide = reference != null && referenceId == null
+
 				val message = buildString {
 					val content = event.message.contentDisplay
 					val author = with(event.message.author.effectiveName) {
 						replace("  ", " ").replace(" ", "_")
 					}
+					val answer = if (ownSide) {
+						val maxLength = 30
+						val originalText = reference.contentDisplay
+						val displayText = if (originalText.length > maxLength) {
+							originalText.substring(0, maxLength) + "..."
+						} else {
+							originalText
+						}
+						" ответил на «$displayText»"
+					} else ""
 					val id = "\r\n[&${event.message.idLong}]"
 					val separator = if (content.contains("[\n\r]".toRegex())) "\n\n" else " "
 
-					append("#").append(author).append(":").append(separator).append(content).append(id)
+					append("#")
+					append(author)
+					append(answer)
+					append(":")
+					append(separator)
+					append(content)
+					append(id)
 				}
-
-				val refId = event.message.referencedMessage?.contentDisplay?.takeIf {
-					it.contains("[&") && it.contains("]")
-				}?.substringAfter("[&")?.substringBefore("]")
 
 				ApiHolder.telegram.execute(SendMessage.builder().apply {
 					chatId(telegramChatId)
 					text(message)
-					refId?.let { replyToMessageId(it.toInt()) }
+					referenceId?.let { replyToMessageId(it.toInt()) }
 				}.build())
 
 				val attachments = event.message.attachments
@@ -211,20 +230,40 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 
 		fun transferToDiscord(update: Update, discordChannelId: Long) {
 			try {
+				val reply = update.message.replyToMessage
+				val replyId = (reply.text ?: reply.caption).takeIf {
+					it.contains("[&") && it.contains("]")
+				}?.substringAfter("[&")?.substringBefore("]")
+
+				val ownSide = reply != null && replyId == null
+
 				val message = buildString {
 					val content = update.message.text ?: update.message.caption ?: ""
 					val author = (update.message.from.userName ?: listOfNotNull(
 						update.message.from.firstName, update.message.from.lastName
 					).joinToString("_")).replace("\\s+".toRegex(), "_")
+					val answer = if (ownSide) {
+						val maxLength = 30
+						val originalText = reply.text ?: reply.caption ?: ""
+						val displayText = if (originalText.length > maxLength) {
+							originalText.substring(0, maxLength) + "..."
+						} else {
+							originalText
+						}
+						" ответил на «$displayText»"
+					} else ""
 					val id = "\r\n-# [&${update.message.messageId}]"
 					val separator = if (content.contains("[\n\r]".toRegex())) "\n\n" else " "
 
-					append("__#").append(author).append("__:").append(separator).append(content).append(id)
+					append("__#")
+					append(author)
+					append("__")
+					append(answer)
+					append(":")
+					append(separator)
+					append(content)
+					append(id)
 				}
-
-				val refId = update.message.replyToMessage?.text?.takeIf {
-					it.contains("[&") && it.contains("]")
-				}?.substringAfter("[&")?.substringBefore("]")
 
 				val channel = ApiHolder.discord.getTextChannelById(
 					discordChannelId
@@ -238,7 +277,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 					val result = if (isImageAndResize) byteArray.resizeImage(160) else byteArray
 					channel.sendMessage(message).apply {
 						addFiles(FileUpload.fromData(result, fileName))
-						refId?.let { setMessageReference(it.toLong()) }
+						replyId?.let { setMessageReference(it.toLong()) }
 						queue()
 					}
 				}
@@ -281,7 +320,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 
 					else -> {
 						channel.sendMessage(message).apply {
-							refId?.let { setMessageReference(it.toLong()) }
+							replyId?.let { setMessageReference(it.toLong()) }
 							queue()
 						}
 					}
