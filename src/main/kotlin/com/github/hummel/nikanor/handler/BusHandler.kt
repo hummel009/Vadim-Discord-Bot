@@ -83,7 +83,11 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 						} else {
 							originalText
 						}
-						" ответил на «$displayText»"
+						if (displayText.isEmpty()) {
+							""
+						} else {
+							" ➦ «$displayText»"
+						}
 					} else ""
 					val id = "\r\n[&${event.message.idLong}]"
 					val separator = if (content.contains("[\n\r]".toRegex())) "\n\n" else " "
@@ -231,7 +235,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 		fun transferToDiscord(update: Update, discordChannelId: Long) {
 			try {
 				val reply = update.message.replyToMessage
-				val replyId = (reply.text ?: reply.caption).takeIf {
+				val replyId = (reply?.text ?: reply?.caption)?.takeIf {
 					it.contains("[&") && it.contains("]")
 				}?.substringAfter("[&")?.substringBefore("]")
 
@@ -250,7 +254,11 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 						} else {
 							originalText
 						}
-						" ответил на «$displayText»"
+						if (displayText.isEmpty()) {
+							""
+						} else {
+							" ➦ «$displayText»"
+						}
 					} else ""
 					val id = "\r\n-# [&${update.message.messageId}]"
 					val separator = if (content.contains("[\n\r]".toRegex())) "\n\n" else " "
