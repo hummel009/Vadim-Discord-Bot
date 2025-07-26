@@ -63,15 +63,25 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 	object Bridge {
 		fun transferToTelegram(event: MessageReceivedEvent, telegramChatId: Long) {
 			try {
-				val content = event.message.contentDisplay
-				val separator = if (content.contains("\n") || content.contains("\r")) "\n\n" else " "
-				val author = with(event.message.author.effectiveName) {
-					replace("  ", " ").replace(" ", "_")
+				val message = buildString {
+					val content = event.message.contentDisplay
+					val author = with(event.message.author.effectiveName) {
+						replace("  ", " ").replace(" ", "_")
+					}
+					val id = "\r\n[&${event.message.idLong}]"
+					val separator = if (content.contains("[\n\r]".toRegex())) "\n\n" else " "
+
+					append("#").append(author).append(":").append(separator).append(content).append(id)
 				}
+
+				val refId = event.message.referencedMessage?.contentDisplay?.takeIf {
+					it.contains("[&") && it.contains("]")
+				}?.substringAfter("[&")?.substringBefore("]")
 
 				ApiHolder.telegram.execute(SendMessage.builder().apply {
 					chatId(telegramChatId)
-					text("#$author:$separator$content")
+					text(message)
+					refId?.let { replyToMessageId(it.toInt()) }
 				}.build())
 
 				val attachments = event.message.attachments
@@ -201,12 +211,20 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 
 		fun transferToDiscord(update: Update, discordChannelId: Long) {
 			try {
-				val content = update.message.text ?: update.message.caption ?: ""
-				val separator = if (content.contains("\n") || content.contains("\r")) "\n\n" else " "
-				val author = with(update.message.from) {
-					(userName ?: listOfNotNull(firstName, lastName).joinToString("_")).replace("  ", " ")
-						.replace(" ", "_")
+				val message = buildString {
+					val content = update.message.text ?: update.message.caption ?: ""
+					val author = (update.message.from.userName ?: listOfNotNull(
+						update.message.from.firstName, update.message.from.lastName
+					).joinToString("_")).replace("\\s+".toRegex(), "_")
+					val id = "\r\n-# [&${update.message.messageId}]"
+					val separator = if (content.contains("[\n\r]".toRegex())) "\n\n" else " "
+
+					append("__#").append(author).append("__:").append(separator).append(content).append(id)
 				}
+
+				val refId = update.message.replyToMessage?.text?.takeIf {
+					it.contains("[&") && it.contains("]")
+				}?.substringAfter("[&")?.substringBefore("]")
 
 				val channel = ApiHolder.discord.getTextChannelById(
 					discordChannelId
@@ -214,11 +232,13 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 					discordChannelId
 				) ?: return
 
-				fun sendFile(fileId: String, fileName: String) {
+				fun sendFile(fileId: String, fileName: String, isImageAndResize: Boolean = false) {
 					val url = ApiHolder.telegram.execute(GetFile(fileId)).getFileUrl(BotData.telegramToken)
 					val byteArray = URL(url).readBytes()
-					channel.sendMessage("__#${author}__:$separator$content").apply {
-						addFiles(FileUpload.fromData(byteArray, fileName))
+					val result = if (isImageAndResize) byteArray.resizeImage(160) else byteArray
+					channel.sendMessage(message).apply {
+						addFiles(FileUpload.fromData(result, fileName))
+						refId?.let { setMessageReference(it.toLong()) }
 						queue()
 					}
 				}
@@ -256,17 +276,13 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 
 					update.message.sticker != null -> {
 						val sticker = update.message.sticker
-						val url = ApiHolder.telegram.execute(GetFile(sticker.fileId)).getFileUrl(BotData.telegramToken)
-						val byteArray = URL(url).readBytes().resizeImage(160)
-						channel.sendMessage("__#${author}__:$separator$content").apply {
-							addFiles(FileUpload.fromData(byteArray, sticker.fileUniqueId + ".webp"))
-							queue()
-						}
+						sendFile(sticker.fileId, sticker.fileUniqueId + ".webp", true)
 					}
 
 					else -> {
-						if (content.isNotBlank()) {
-							channel.sendMessage("__#${author}__:$separator$content").queue()
+						channel.sendMessage(message).apply {
+							refId?.let { setMessageReference(it.toLong()) }
+							queue()
 						}
 					}
 				}

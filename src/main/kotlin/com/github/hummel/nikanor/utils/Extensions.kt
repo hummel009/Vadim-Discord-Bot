@@ -37,7 +37,7 @@ fun EmbedBuilder.success(member: Member?, guildData: GuildData, desc: String): M
 	setColor(0x00FF00)
 }.build()
 
-fun ByteArray.resizeImage(width: Int = 160): ByteArray {
+fun ByteArray.resizeImage(width: Int): ByteArray {
 	val inputStream = ByteArrayInputStream(this)
 	val originalImage = ImageIO.read(inputStream)
 
