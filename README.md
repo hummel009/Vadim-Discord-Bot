@@ -9,7 +9,7 @@
 [![Technical Debt][technical_debt_badge]][technical_debt_link]
 [![Lines of Code][lines_of_code_badge]][lines_of_code_link]
 
-My discord bot for my discord servers. His name is Никанор (Nikanor). Key features:
+My discord bot for my discord servers. His name is Вадим (Vadim). Key features:
 
 * Four languages of interface: english, russian, belarusian and ukrainian.
 * Connecting one discord channel with one telegram chat. Bot will be transferring all messages from first to second and
@@ -19,42 +19,42 @@ My discord bot for my discord servers. His name is Никанор (Nikanor). Key
 
 <!----------------------------------------------------------------------------->
 
-[code_smells_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=code_smells
+[code_smells_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Vadim-Discord-Bot&metric=code_smells
 
-[code_smells_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
+[code_smells_link]: https://sonarcloud.io/summary/overall?id=hummel009_Vadim-Discord-Bot
 
-[maintainability_rating_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=sqale_rating
+[maintainability_rating_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Vadim-Discord-Bot&metric=sqale_rating
 
-[maintainability_rating_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
+[maintainability_rating_link]: https://sonarcloud.io/summary/overall?id=hummel009_Vadim-Discord-Bot
 
-[security_rating_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=security_rating
+[security_rating_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Vadim-Discord-Bot&metric=security_rating
 
-[security_rating_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
+[security_rating_link]: https://sonarcloud.io/summary/overall?id=hummel009_Vadim-Discord-Bot
 
-[bugs_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=bugs
+[bugs_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Vadim-Discord-Bot&metric=bugs
 
-[bugs_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
+[bugs_link]: https://sonarcloud.io/summary/overall?id=hummel009_Vadim-Discord-Bot
 
-[vulnerabilities_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=vulnerabilities
+[vulnerabilities_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Vadim-Discord-Bot&metric=vulnerabilities
 
-[vulnerabilities_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
+[vulnerabilities_link]: https://sonarcloud.io/summary/overall?id=hummel009_Vadim-Discord-Bot
 
-[duplicated_lines_density_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=duplicated_lines_density
+[duplicated_lines_density_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Vadim-Discord-Bot&metric=duplicated_lines_density
 
-[duplicated_lines_density_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
+[duplicated_lines_density_link]: https://sonarcloud.io/summary/overall?id=hummel009_Vadim-Discord-Bot
 
-[reliability_rating_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=reliability_rating
+[reliability_rating_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Vadim-Discord-Bot&metric=reliability_rating
 
-[reliability_rating_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
+[reliability_rating_link]: https://sonarcloud.io/summary/overall?id=hummel009_Vadim-Discord-Bot
 
-[quality_gate_status_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=alert_status
+[quality_gate_status_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Vadim-Discord-Bot&metric=alert_status
 
-[quality_gate_status_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
+[quality_gate_status_link]: https://sonarcloud.io/summary/overall?id=hummel009_Vadim-Discord-Bot
 
-[technical_debt_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=sqale_index
+[technical_debt_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Vadim-Discord-Bot&metric=sqale_index
 
-[technical_debt_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
+[technical_debt_link]: https://sonarcloud.io/summary/overall?id=hummel009_Vadim-Discord-Bot
 
-[lines_of_code_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Nikanor-Discord-Bot&metric=ncloc
+[lines_of_code_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Vadim-Discord-Bot&metric=ncloc
 
-[lines_of_code_link]: https://sonarcloud.io/summary/overall?id=hummel009_Nikanor-Discord-Bot
+[lines_of_code_link]: https://sonarcloud.io/summary/overall?id=hummel009_Vadim-Discord-Bot
