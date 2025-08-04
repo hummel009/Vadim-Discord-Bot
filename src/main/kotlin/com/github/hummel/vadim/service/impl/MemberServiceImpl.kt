@@ -16,19 +16,19 @@ class MemberServiceImpl : MemberService {
 			return
 		}
 
-		event.deferReply().queue {
+		event.deferReply().queue { consumer ->
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
-			guildData.managerRoleIds.removeIf { roleId ->
-				guild.getRoleById(roleId) == null
+			guildData.managerRoleIds.removeIf {
+				guild.getRoleById(it) == null
 			}
 
-			guildData.localBus.removeIf { lc ->
+			guildData.localBus.removeIf {
 				(guild.getTextChannelById(
-					lc.discordChannelId
+					it.discordChannelId
 				) ?: guild.getThreadChannelById(
-					lc.discordChannelId
+					it.discordChannelId
 				)) == null
 			}
 
@@ -40,12 +40,11 @@ class MemberServiceImpl : MemberService {
 					append("\r\n", I18n.of("no_manager_roles", guildData), "\r\n")
 				} else {
 					append("\r\n", I18n.of("has_manager_roles", guildData), "\r\n")
-					guildData.managerRoleIds.joinTo(this, "\r\n") { roleId ->
-						I18n.of("manager_role", guildData).format(roleId)
+					guildData.managerRoleIds.joinTo(this, "\r\n") {
+						I18n.of("manager_role", guildData).format(it)
 					}
 					append("\r\n")
 				}
-
 				if (guildData.localBus.isEmpty()) {
 					append("\r\n", I18n.of("no_connections", guildData), "\r\n")
 				} else {
