@@ -32,6 +32,7 @@ class ManagerServiceImpl : ManagerService {
 				if (arguments.size == 1) {
 					try {
 						val lang = arguments[0]
+
 						if (lang != "ru" && lang != "be" && lang != "uk" && lang != "en") {
 							throw Exception()
 						}
@@ -217,7 +218,9 @@ class ManagerServiceImpl : ManagerService {
 							}
 
 							EmbedBuilder().success(
-								event.member, guildData, I18n.of("clear_connections_single", guildData).format(discordChannelId)
+								event.member,
+								guildData,
+								I18n.of("clear_connections_single", guildData).format(discordChannelId)
 							)
 						} catch (_: Exception) {
 							EmbedBuilder().error(event.member, guildData, I18n.of("msg_error_format", guildData))
