@@ -55,7 +55,7 @@ class LoginServiceImpl : LoginService {
 			"clear_manager_roles".cmd("/clear_manager_roles {role_id}", string(false)),
 
 			"add_connection".cmd("/add_connection [discord_channel_id] [telegram_chat_id]", string()),
-			"clear_connections".cmd("/clear_connections {discord_channel_id|telegram_chat_id}", string(false)),
+			"clear_connections".cmd("/clear_connections {discord_channel_id}", string(false)),
 
 			"commit".cmd("/commit", empty()),
 			"uncommit".cmd("/uncommit", string(false)),

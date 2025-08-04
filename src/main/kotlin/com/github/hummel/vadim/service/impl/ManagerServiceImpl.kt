@@ -115,8 +115,8 @@ class ManagerServiceImpl : ManagerService {
 						try {
 							val roleId = arguments[0].toLong()
 
-							guildData.managerRoleIds.removeIf {
-								it == roleId
+							if (!guildData.managerRoleIds.removeIf { it == roleId }) {
+								throw Exception()
 							}
 
 							EmbedBuilder().success(
@@ -210,14 +210,14 @@ class ManagerServiceImpl : ManagerService {
 				} else {
 					if (arguments.size == 1) {
 						try {
-							val id = arguments[0].toLong()
+							val discordChannelId = arguments[0].toLong()
 
-							guildData.localBus.removeIf {
-								it.discordChannelId == id || it.telegramChatId == id
+							if (!guildData.localBus.removeIf { it.discordChannelId == discordChannelId }) {
+								throw Exception()
 							}
 
 							EmbedBuilder().success(
-								event.member, guildData, I18n.of("clear_connections_single", guildData)
+								event.member, guildData, I18n.of("clear_connections_single", guildData).format(discordChannelId)
 							)
 						} catch (_: Exception) {
 							EmbedBuilder().error(event.member, guildData, I18n.of("msg_error_format", guildData))
