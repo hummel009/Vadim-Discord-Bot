@@ -49,10 +49,10 @@ class LoginServiceImpl : LoginService {
 		val commands = listOf(
 			"info".cmd("/info", empty()),
 
+			"set_language".cmd("/set_language [ru/be/uk/en]", string()),
+
 			"add_manager_role".cmd("/add_manager_role [role_id]", string()),
 			"clear_manager_roles".cmd("/clear_manager_roles {role_id}", string(false)),
-
-			"set_language".cmd("/set_language [ru/be/uk/en]", string()),
 
 			"add_connection".cmd("/add_connection [discord_channel_id] [telegram_chat_id]", string()),
 			"clear_connections".cmd("/clear_connections {discord_channel_id|telegram_chat_id}", string(false)),
