@@ -44,12 +44,11 @@ fun ByteArray.resizeImage(width: Int): ByteArray {
 	val originalWidth = originalImage.width
 	val originalHeight = originalImage.height
 
-	val newWidth = width
-	val newHeight = (originalHeight.toDouble() / originalWidth.toDouble() * newWidth).toInt()
+	val newHeight = (originalHeight.toDouble() / originalWidth.toDouble() * width).toInt()
 
-	val resizedImage = BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB)
+	val resizedImage = BufferedImage(width, newHeight, BufferedImage.TYPE_INT_ARGB)
 	val graphics2D = resizedImage.createGraphics()
-	graphics2D.drawImage(originalImage.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH), 0, 0, null)
+	graphics2D.drawImage(originalImage.getScaledInstance(width, newHeight, Image.SCALE_SMOOTH), 0, 0, null)
 	graphics2D.dispose()
 
 	val outputStream = ByteArrayOutputStream()
