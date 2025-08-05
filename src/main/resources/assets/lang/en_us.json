@@ -1,6 +1,6 @@
 {
-	"manager_role": "<@&%d>",
 	"connection": "<#%d> = %d",
+	"manager_role": "<@&%d>",
 	"info_language": "Interface language: %s",
 	"has_manager_roles": "Manager roles:",
 	"has_connections": "Connections:",
