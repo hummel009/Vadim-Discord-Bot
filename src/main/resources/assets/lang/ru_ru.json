@@ -1,7 +1,7 @@
 {
-	"info_manager_role": "<@&%d>",
-	"info_connection": "<#%d> = %d",
-	"info_language": "Язык интерфейса: %s.",
+	"manager_role": "<@&%d>",
+	"connection": "<#%d> = %d",
+	"info_language": "Язык интерфейса: %s",
 	"has_manager_roles": "Управляющие роли:",
 	"has_connections": "Соединения:",
 	"no_manager_roles": "Управляющих ролей нет.",

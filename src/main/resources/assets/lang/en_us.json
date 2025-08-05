@@ -1,7 +1,7 @@
 {
-	"info_manager_role": "<@&%d>",
-	"info_connection": "<#%d> = %d",
-	"info_language": "Language: %s",
+	"manager_role": "<@&%d>",
+	"connection": "<#%d> = %d",
+	"info_language": "Interface language: %s",
 	"has_manager_roles": "Manager roles:",
 	"has_connections": "Connections:",
 	"no_manager_roles": "Here are no manager roles.",

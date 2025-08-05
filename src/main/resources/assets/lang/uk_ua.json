@@ -1,7 +1,7 @@
 {
-	"info_manager_role": "<@&%d>",
-	"info_connection": "<#%d> = %d",
-	"info_language": "Мова інтерфейсу: %s.",
+	"manager_role": "<@&%d>",
+	"connection": "<#%d> = %d",
+	"info_language": "Мова інтерфейсу: %s",
 	"has_manager_roles": "Керівницькі ролі:",
 	"has_connections": "З'єднанні:",
 	"no_manager_roles": "Керівницьких ролей немає.",

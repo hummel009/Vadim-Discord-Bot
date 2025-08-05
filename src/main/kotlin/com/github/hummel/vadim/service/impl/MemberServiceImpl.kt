@@ -41,7 +41,7 @@ class MemberServiceImpl : MemberService {
 				} else {
 					append("\r\n", I18n.of("has_manager_roles", guildData), "\r\n")
 					guildData.managerRoleIds.joinTo(this, "\r\n") {
-						I18n.of("info_manager_role", guildData).format(it)
+						I18n.of("manager_role", guildData).format(it)
 					}
 					append("\r\n")
 				}
@@ -51,7 +51,7 @@ class MemberServiceImpl : MemberService {
 				} else {
 					append("\r\n", I18n.of("has_connections", guildData), "\r\n")
 					guildData.localBus.joinTo(this, "\r\n") {
-						I18n.of("info_connection", guildData).format(it.discordChannelId, it.telegramChatId)
+						I18n.of("connection", guildData).format(it.discordChannelId, it.telegramChatId)
 					}
 					append("\r\n")
 				}
