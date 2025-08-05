@@ -29,6 +29,7 @@ class ManagerServiceImpl : ManagerService {
 				EmbedBuilder().access(event.member, guildData, I18n.of("msg_access", guildData))
 			} else {
 				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
+
 				if (arguments.size == 1) {
 					try {
 						val lang = arguments[0]
@@ -70,6 +71,7 @@ class ManagerServiceImpl : ManagerService {
 				EmbedBuilder().access(event.member, guildData, I18n.of("msg_access", guildData))
 			} else {
 				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
+
 				if (arguments.size == 1) {
 					try {
 						val roleId = arguments[0].toLong()
@@ -107,6 +109,7 @@ class ManagerServiceImpl : ManagerService {
 				EmbedBuilder().access(event.member, guildData, I18n.of("msg_access", guildData))
 			} else {
 				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
+
 				if (arguments.isEmpty()) {
 					guildData.managerRoleIds.clear()
 
@@ -150,6 +153,7 @@ class ManagerServiceImpl : ManagerService {
 				EmbedBuilder().access(event.member, guildData, I18n.of("msg_access", guildData))
 			} else {
 				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
+
 				if (arguments.size == 2) {
 					try {
 						val discordChannelId = arguments[0].toLong()
@@ -204,23 +208,25 @@ class ManagerServiceImpl : ManagerService {
 				EmbedBuilder().access(event.member, guildData, I18n.of("msg_access", guildData))
 			} else {
 				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
+
 				if (arguments.isEmpty()) {
 					guildData.localBus.clear()
 
 					EmbedBuilder().success(event.member, guildData, I18n.of("clear_connections", guildData))
 				} else {
-					if (arguments.size == 1) {
+					if (arguments.size == 2) {
 						try {
 							val discordChannelId = arguments[0].toLong()
+							val telegramChatId = arguments[1].toLong()
 
-							if (!guildData.localBus.removeIf { it.discordChannelId == discordChannelId }) {
+							if (!guildData.localBus.removeIf { it.discordChannelId == discordChannelId && it.telegramChatId == telegramChatId }) {
 								throw Exception()
 							}
 
 							EmbedBuilder().success(
 								event.member,
 								guildData,
-								I18n.of("clear_connections_single", guildData).format(discordChannelId)
+								I18n.of("clear_connections_single", guildData).format(discordChannelId, telegramChatId)
 							)
 						} catch (_: Exception) {
 							EmbedBuilder().error(event.member, guildData, I18n.of("msg_error_format", guildData))
