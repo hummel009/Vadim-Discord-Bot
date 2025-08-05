@@ -172,7 +172,7 @@ class ManagerServiceImpl : ManagerService {
 						}
 
 						if (noClash) {
-							guildData.localBus.add(Connection(guildData.guildId, discordChannelId, telegramChatId))
+							guildData.localBus.add(Connection(guild.idLong, discordChannelId, telegramChatId))
 						} else {
 							throw Exception()
 						}
@@ -302,7 +302,7 @@ class ManagerServiceImpl : ManagerService {
 			} else {
 				try {
 					busRegistry.globalBus.removeIf {
-						it.guildId == guildData.guildId
+						it.guildId == guild.idLong
 					}
 
 					EmbedBuilder().success(
