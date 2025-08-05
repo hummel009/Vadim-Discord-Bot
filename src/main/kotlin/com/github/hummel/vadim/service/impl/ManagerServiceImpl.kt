@@ -33,7 +33,7 @@ class ManagerServiceImpl : ManagerService {
 					try {
 						val lang = arguments[0]
 
-						if (lang != "ru" && lang != "be" && lang != "uk" && lang != "en") {
+						if (lang !in listOf("ru", "be", "uk", "en")) {
 							throw Exception()
 						}
 
