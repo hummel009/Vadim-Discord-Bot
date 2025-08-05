@@ -129,7 +129,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 
 				try {
 					for (attachment in attachments) {
-						if (attachment.size >= 5_000_000) {
+						if (attachment.size >= 9_999_999) {
 							continue
 						}
 						val byteArray = FileProxy(attachment.url).download().join().readBytes()
@@ -296,38 +296,59 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 
 				when {
 					update.message.photo != null -> {
-						val photoSize = update.message.photo.last()
-						sendFile(photoSize.fileId, "photo.jpg")
+						val photo = update.message.photo.last()
+
+						if (photo.fileSize <= 9_999_999) {
+							sendFile(photo.fileId, "photo.jpg")
+						}
 					}
 
 					update.message.video != null -> {
 						val video = update.message.video
-						sendFile(video.fileId, video.fileName ?: "video.mp4")
+
+						if (video.fileSize <= 9_999_999) {
+							sendFile(video.fileId, video.fileName ?: "video.mp4")
+						}
 					}
 
 					update.message.audio != null -> {
 						val audio = update.message.audio
-						sendFile(audio.fileId, audio.fileName ?: "audio.mp3")
+
+						if (audio.fileSize <= 9_999_999) {
+							sendFile(audio.fileId, audio.fileName ?: "audio.mp3")
+						}
 					}
 
 					update.message.document != null -> {
 						val file = update.message.document
-						sendFile(file.fileId, file.fileName)
+
+						if (file.fileSize <= 9_999_999) {
+							sendFile(file.fileId, file.fileName)
+						}
 					}
 
 					update.message.animation != null -> {
 						val animation = update.message.animation
-						sendFile(animation.fileId, animation.fileName ?: "animation.gif")
+
+						if (animation.fileSize <= 9_999_999) {
+							sendFile(animation.fileId, animation.fileName ?: "animation.gif")
+						}
 					}
 
 					update.message.voice != null -> {
 						val voice = update.message.voice
-						sendFile(voice.fileId, "voice.ogg")
+
+						if (voice.fileSize <= 9_999_999) {
+							sendFile(voice.fileId, "voice.ogg")
+						}
 					}
 
 					update.message.sticker != null -> {
 						val sticker = update.message.sticker
-						sendFile(sticker.fileId, sticker.fileUniqueId + ".webp", true)
+
+						if (sticker.fileSize <= 9_999_999) {
+							sendFile(sticker.fileId, sticker.fileUniqueId + ".webp", true)
+						}
 					}
 
 					else -> {
