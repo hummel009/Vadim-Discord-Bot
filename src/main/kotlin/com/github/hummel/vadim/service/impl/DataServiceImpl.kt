@@ -18,7 +18,7 @@ class DataServiceImpl : DataService {
 		val folderName = guild.id
 		val filePath = "guilds/$folderName/data.json"
 
-		return jsonDao.readFromFile(filePath, GuildData::class.java) ?: initAndGet(guild)
+		return jsonDao.readFromFile(filePath, GuildData::class.java) ?: initAndGetGuildData(guild)
 	}
 
 	override fun saveGuildData(guild: Guild, guildData: GuildData) {
@@ -30,7 +30,8 @@ class DataServiceImpl : DataService {
 
 	override fun loadGlobalData(): GlobalData {
 		val filePath = "guilds/data.json"
-		return jsonDao.readFromFile(filePath, GlobalData::class.java) ?: GlobalData(mutableSetOf())
+
+		return jsonDao.readFromFile(filePath, GlobalData::class.java) ?: initAndGetGlobalData()
 	}
 
 	override fun saveGlobalData(globalData: GlobalData) {
@@ -82,24 +83,13 @@ class DataServiceImpl : DataService {
 		return file
 	}
 
-	private fun initAndGet(guild: Guild): GuildData {
-		val folderName = guild.id
-		val serverPath = "guilds/$folderName"
-		val dataPath = "guilds/$folderName/data.json"
+	private fun initAndGetGuildData(guild: Guild): GuildData = GuildData(
+		guildId = guild.idLong,
+		guildName = guild.name,
+		lang = "ru",
+		managerRoleIds = mutableSetOf(),
+		localBus = mutableSetOf()
+	)
 
-		fileDao.createEmptyFolder(serverPath)
-		fileDao.createEmptyFile(dataPath)
-
-		val guildData = GuildData(
-			guildId = guild.idLong,
-			guildName = guild.name,
-			lang = "ru",
-			managerRoleIds = mutableSetOf(),
-			localBus = mutableSetOf()
-		)
-
-		jsonDao.writeToFile(dataPath, guildData)
-
-		return guildData
-	}
+	private fun initAndGetGlobalData(): GlobalData = GlobalData(mutableSetOf())
 }

@@ -83,7 +83,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 						val maxLength = 30
 						val originalText = reference.contentStripped
 						val displayText = if (originalText.length > maxLength) {
-							originalText.substring(0, maxLength) + "..."
+							originalText.take(maxLength) + "..."
 						} else {
 							originalText
 						}
@@ -254,7 +254,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 						val maxLength = 30
 						val originalText = reply.text ?: reply.caption ?: ""
 						val displayText = if (originalText.length > maxLength) {
-							originalText.substring(0, maxLength) + "..."
+							originalText.take(maxLength) + "..."
 						} else {
 							originalText
 						}

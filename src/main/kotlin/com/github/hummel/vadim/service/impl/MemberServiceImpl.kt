@@ -16,7 +16,7 @@ class MemberServiceImpl : MemberService {
 			return
 		}
 
-		event.deferReply().queue { consumer ->
+		event.deferReply().queue {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
