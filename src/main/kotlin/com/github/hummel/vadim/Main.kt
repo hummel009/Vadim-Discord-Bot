@@ -8,7 +8,7 @@ import java.io.FileReader
 import java.io.FileWriter
 
 data class Config(
-	val discordToken: String, val telegramToken: String, val ownerId: String, val reinit: Boolean?
+	val discordToken: String, val telegramToken: String, val ownerId: String, val reinit: Boolean
 )
 
 fun main() {
@@ -54,7 +54,6 @@ fun requestUserInput() {
 	launchWithData(config, "files")
 }
 
-@Suppress("UNUSED_PARAMETER")
 fun launchWithData(config: Config, root: String) {
 	BotData.discordToken = config.discordToken
 	BotData.telegramToken = config.telegramToken
@@ -62,5 +61,5 @@ fun launchWithData(config: Config, root: String) {
 	BotData.root = root
 
 	val loginService = ServiceFactory.loginService
-	loginService.loginBot(config.reinit ?: false)
+	loginService.loginBot(config.reinit)
 }
