@@ -132,16 +132,25 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 						if (attachment.size >= 9_999_999) {
 							continue
 						}
-						val byteArray = FileProxy(attachment.url).download().join().readBytes()
-						val tempFile = tempDir.resolve(attachment.fileName).toFile()
+						val byteArray = FileProxy(attachment.proxyUrl).download().join().readBytes()
+						val tempFile = tempDir.resolve("${System.currentTimeMillis()}_${attachment.fileName}").toFile()
 						tempFile.writeBytes(byteArray)
 						tempFiles.add(tempFile)
 
-						when (attachment.fileExtension?.lowercase()) {
-							"jpg", "jpeg", "png" -> images.add(tempFile)
-							"mp4", "mov", "mpg", "mpeg" -> videos.add(tempFile)
-							"mp3", "wav", "ogg", "m4a" -> audios.add(tempFile)
-							"gif" -> gifs.add(tempFile)
+						when {
+							listOf("jpg", "jpeg", "png").any {
+								attachment.fileName.lowercase().contains(it)
+							} -> images.add(tempFile)
+
+							listOf("mp4", "mov", "mpg", "mpeg").any {
+								attachment.fileName.lowercase().contains(it)
+							} -> videos.add(tempFile)
+
+							listOf("mp3", "wav", "ogg", "m4a").any {
+								attachment.fileName.lowercase().contains(it)
+							} -> audios.add(tempFile)
+
+							attachment.fileName.lowercase().contains("gif") -> gifs.add(tempFile)
 							else -> documents.add(tempFile)
 						}
 					}
