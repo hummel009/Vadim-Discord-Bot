@@ -175,7 +175,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 
 					if (images.size > 1) {
 						ApiHolder.telegram.execute(SendMediaGroup.builder().apply {
-							chatId(telegramChatId.toString())
+							chatId("$telegramChatId")
 							medias(images.map {
 								InputMediaPhoto(it, it.name)
 							})
@@ -189,7 +189,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 
 					if (videos.size > 1) {
 						ApiHolder.telegram.execute(SendMediaGroup.builder().apply {
-							chatId(telegramChatId.toString())
+							chatId("$telegramChatId")
 							medias(videos.map {
 								InputMediaVideo(it, it.name)
 							})
@@ -203,7 +203,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 
 					if (audios.size > 1) {
 						ApiHolder.telegram.execute(SendMediaGroup.builder().apply {
-							chatId(telegramChatId.toString())
+							chatId("$telegramChatId")
 							medias(audios.map {
 								InputMediaAudio(it, it.name)
 							})
@@ -217,7 +217,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 
 					if (documents.size > 1) {
 						ApiHolder.telegram.execute(SendMediaGroup.builder().apply {
-							chatId(telegramChatId.toString())
+							chatId("$telegramChatId")
 							medias(documents.map {
 								InputMediaDocument(it, it.name)
 							})
