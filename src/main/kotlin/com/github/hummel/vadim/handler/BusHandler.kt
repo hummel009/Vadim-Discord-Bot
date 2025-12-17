@@ -32,7 +32,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 
 	override fun onEvent(event: GenericEvent) {
 		if (event is MessageReceivedEvent) {
-			if (event.author.isBot) {
+			if (event.author.idLong == ApiHolder.discord.selfUser.idLong) {
 				return
 			}
 
