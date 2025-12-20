@@ -67,5 +67,5 @@ fun String.escapeMarkdownV2(): String {
 		}
 		sb.append(char)
 	}
-	return sb.toString()
+	return "$sb"
 }

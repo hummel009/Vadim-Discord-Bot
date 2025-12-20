@@ -36,7 +36,7 @@ val minus: Char = alphabet.last()
 
 fun Long.encode(): String {
 	if (this == 0L) {
-		return alphabet[0].toString()
+		return "${alphabet[0]}"
 	}
 	var number = this
 	val negative = number < 0
