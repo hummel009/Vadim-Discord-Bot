@@ -118,8 +118,8 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 					return
 				}
 
-				val images = mutableListOf<File>()
-				val videos = mutableListOf<File>()
+				val images = mutableListOf<Pair<File, Boolean>>()
+				val videos = mutableListOf<Pair<File, Boolean>>()
 				val audios = mutableListOf<File>()
 				val gifs = mutableListOf<File>()
 				val documents = mutableListOf<File>()
@@ -137,20 +137,23 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 						tempFile.writeBytes(byteArray)
 						tempFiles.add(tempFile)
 
+						val hasSpoiler = attachment.isSpoiler
+
 						when {
 							listOf("jpg", "jpeg", "png").any {
 								attachment.fileName.lowercase().contains(it)
-							} -> images.add(tempFile)
+							} -> images.add(tempFile to hasSpoiler)
 
 							listOf("mp4", "mov", "mpg", "mpeg").any {
 								attachment.fileName.lowercase().contains(it)
-							} -> videos.add(tempFile)
+							} -> videos.add(tempFile to hasSpoiler)
 
 							listOf("mp3", "wav", "ogg", "m4a").any {
 								attachment.fileName.lowercase().contains(it)
 							} -> audios.add(tempFile)
 
 							attachment.fileName.lowercase().contains("gif") -> gifs.add(tempFile)
+
 							else -> documents.add(tempFile)
 						}
 					}
@@ -168,7 +171,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 						tempFiles.add(tempFile)
 
 						when (extension) {
-							"jpg", "jpeg", "png" -> images.add(tempFile)
+							"jpg", "jpeg", "png" -> images.add(tempFile to false)
 							"gif" -> gifs.add(tempFile)
 						}
 					}
@@ -176,28 +179,30 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 					if (images.size > 1) {
 						ApiHolder.telegram.execute(SendMediaGroup.builder().apply {
 							chatId("$telegramChatId")
-							medias(images.map {
-								InputMediaPhoto(it, it.name)
+							medias(images.map { (image, spoiler) ->
+								InputMediaPhoto(image, image.name).apply { hasSpoiler = spoiler }
 							})
 						}.build())
 					} else if (images.size == 1) {
 						ApiHolder.telegram.execute(SendPhoto.builder().apply {
 							chatId(telegramChatId)
-							photo(InputFile(images[0]))
+							photo(InputFile(images[0].first))
+							hasSpoiler(images[0].second)
 						}.build())
 					}
 
 					if (videos.size > 1) {
 						ApiHolder.telegram.execute(SendMediaGroup.builder().apply {
 							chatId("$telegramChatId")
-							medias(videos.map {
-								InputMediaVideo(it, it.name)
+							medias(videos.map { (video, spoiler) ->
+								InputMediaVideo(video, video.name).apply { hasSpoiler = spoiler }
 							})
 						}.build())
 					} else if (videos.size == 1) {
 						ApiHolder.telegram.execute(SendVideo.builder().apply {
 							chatId(telegramChatId)
-							video(InputFile(videos[0]))
+							video(InputFile(videos[0].first))
+							hasSpoiler(videos[0].second)
 						}.build())
 					}
 
@@ -229,10 +234,10 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 						}.build())
 					}
 
-					for (inputFile in gifs) {
+					for (gif in gifs) {
 						ApiHolder.telegram.execute(SendAnimation.builder().apply {
 							chatId(telegramChatId)
-							animation(InputFile(inputFile))
+							animation(InputFile(gif))
 						}.build())
 					}
 				} catch (ex: Exception) {
@@ -253,6 +258,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 				}?.substringAfter("औ")
 
 				val ownSide = reply != null && replyId == null
+				val hasSpoiler = update.message.hasMediaSpoiler ?: false
 
 				val message = buildString {
 					val content = update.message.text ?: update.message.caption ?: ""
@@ -296,8 +302,9 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 					val url = ApiHolder.telegram.execute(GetFile(fileId)).getFileUrl(BotData.telegramToken)
 					val byteArray = URL(url).readBytes()
 					val result = if (isImageAndResize) byteArray.resizeImage(160) else byteArray
+					val finalFileName = if (hasSpoiler) "SPOILER_$fileName" else fileName
 					channel.sendMessage(message).apply {
-						addFiles(FileUpload.fromData(result, fileName))
+						addFiles(FileUpload.fromData(result, finalFileName))
 						replyId?.let { setMessageReference(it.decode()) }
 						queue()
 					}
