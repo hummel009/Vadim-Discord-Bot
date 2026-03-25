@@ -3,19 +3,17 @@
 [![Security Rating][security_rating_badge]][security_rating_link]
 [![Bugs][bugs_badge]][bugs_link]
 [![Vulnerabilities][vulnerabilities_badge]][vulnerabilities_link]
-[![Duplicated Lines (%)][duplicated_lines_density_badge]][duplicated_lines_density_link]
 [![Reliability Rating][reliability_rating_badge]][reliability_rating_link]
 [![Quality Gate Status][quality_gate_status_badge]][quality_gate_status_link]
 [![Technical Debt][technical_debt_badge]][technical_debt_link]
 [![Lines of Code][lines_of_code_badge]][lines_of_code_link]
 
-My discord bot for my discord servers. His name is Вадим (Vadim). Key features:
+My discord bot for my discord servers. His name is Вадим (Vadim). 
+This bot connects one discord channel with one telegram chat, transferring messages in both directions.
+Other features:
 
 * Four languages of interface: english, russian, belarusian and ukrainian.
-* Connecting one discord channel with one telegram chat. Bot will be transferring all messages from first to second and
-  vice versa.
-* Adding bot manager roles to allow not only admins change upper settings.
-* Server data can be deleted by admins and manager roles, if you are concerned about your privacy.
+* Manager roles for data & settings management.
 
 <!----------------------------------------------------------------------------->
 
@@ -38,10 +36,6 @@ My discord bot for my discord servers. His name is Вадим (Vadim). Key featu
 [vulnerabilities_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Vadim-Discord-Bot&metric=vulnerabilities
 
 [vulnerabilities_link]: https://sonarcloud.io/summary/overall?id=hummel009_Vadim-Discord-Bot
-
-[duplicated_lines_density_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Vadim-Discord-Bot&metric=duplicated_lines_density
-
-[duplicated_lines_density_link]: https://sonarcloud.io/summary/overall?id=hummel009_Vadim-Discord-Bot
 
 [reliability_rating_badge]: https://sonarcloud.io/api/project_badges/measure?project=hummel009_Vadim-Discord-Bot&metric=reliability_rating
 
