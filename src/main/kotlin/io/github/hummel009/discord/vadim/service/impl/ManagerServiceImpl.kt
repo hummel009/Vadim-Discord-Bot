@@ -1,14 +1,14 @@
 package io.github.hummel009.discord.vadim.service.impl
 
-import com.github.hummel.vadim.bean.Connection
-import com.github.hummel.vadim.factory.ServiceFactory
-import com.github.hummel.vadim.service.AccessService
-import com.github.hummel.vadim.service.DataService
-import com.github.hummel.vadim.service.ManagerService
-import com.github.hummel.vadim.utils.I18n
-import com.github.hummel.vadim.utils.access
-import com.github.hummel.vadim.utils.error
-import com.github.hummel.vadim.utils.success
+import io.github.hummel009.discord.vadim.bean.Connection
+import io.github.hummel009.discord.vadim.factory.ServiceFactory
+import io.github.hummel009.discord.vadim.service.AccessService
+import io.github.hummel009.discord.vadim.service.DataService
+import io.github.hummel009.discord.vadim.service.ManagerService
+import io.github.hummel009.discord.vadim.utils.I18n
+import io.github.hummel009.discord.vadim.utils.access
+import io.github.hummel009.discord.vadim.utils.error
+import io.github.hummel009.discord.vadim.utils.success
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 

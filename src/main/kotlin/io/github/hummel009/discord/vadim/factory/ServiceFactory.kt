@@ -1,7 +1,7 @@
 package io.github.hummel009.discord.vadim.factory
 
-import com.github.hummel.vadim.service.*
-import com.github.hummel.vadim.service.impl.*
+import io.github.hummel009.discord.vadim.service.*
+import io.github.hummel009.discord.vadim.service.impl.*
 
 @Suppress("unused", "RedundantSuppression")
 object ServiceFactory {

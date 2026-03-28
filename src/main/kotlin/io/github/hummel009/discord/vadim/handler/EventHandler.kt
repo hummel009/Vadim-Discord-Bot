@@ -1,9 +1,9 @@
 package io.github.hummel009.discord.vadim.handler
 
-import com.github.hummel.vadim.factory.ServiceFactory
-import com.github.hummel.vadim.service.ManagerService
-import com.github.hummel.vadim.service.MemberService
-import com.github.hummel.vadim.service.OwnerService
+import io.github.hummel009.discord.vadim.factory.ServiceFactory
+import io.github.hummel009.discord.vadim.service.ManagerService
+import io.github.hummel009.discord.vadim.service.MemberService
+import io.github.hummel009.discord.vadim.service.OwnerService
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 

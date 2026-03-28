@@ -1,6 +1,6 @@
 package io.github.hummel009.discord.vadim.utils
 
-import com.github.hummel.vadim.bean.GuildData
+import io.github.hummel009.discord.vadim.bean.GuildData
 import java.io.InputStreamReader
 
 object I18n {

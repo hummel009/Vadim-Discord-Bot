@@ -1,10 +1,10 @@
 package io.github.hummel009.discord.vadim.service.impl
 
-import com.github.hummel.vadim.ApiHolder
-import com.github.hummel.vadim.bean.BotData
-import com.github.hummel.vadim.handler.BusHandler
-import com.github.hummel.vadim.handler.EventHandler
-import com.github.hummel.vadim.service.LoginService
+import io.github.hummel009.discord.vadim.ApiHolder
+import io.github.hummel009.discord.vadim.bean.BotData
+import io.github.hummel009.discord.vadim.handler.BusHandler
+import io.github.hummel009.discord.vadim.handler.EventHandler
+import io.github.hummel009.discord.vadim.service.LoginService
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands

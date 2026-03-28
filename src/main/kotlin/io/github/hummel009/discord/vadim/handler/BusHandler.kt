@@ -1,13 +1,13 @@
 package io.github.hummel009.discord.vadim.handler
 
-import com.github.hummel.vadim.ApiHolder
-import com.github.hummel.vadim.bean.BotData
-import com.github.hummel.vadim.factory.ServiceFactory
-import com.github.hummel.vadim.service.DataService
-import com.github.hummel.vadim.utils.decode
-import com.github.hummel.vadim.utils.encode
-import com.github.hummel.vadim.utils.escapeMarkdownV2
-import com.github.hummel.vadim.utils.resizeImage
+import io.github.hummel009.discord.vadim.ApiHolder
+import io.github.hummel009.discord.vadim.bean.BotData
+import io.github.hummel009.discord.vadim.factory.ServiceFactory
+import io.github.hummel009.discord.vadim.service.DataService
+import io.github.hummel009.discord.vadim.utils.decode
+import io.github.hummel009.discord.vadim.utils.encode
+import io.github.hummel009.discord.vadim.utils.escapeMarkdownV2
+import io.github.hummel009.discord.vadim.utils.resizeImage
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.EventListener

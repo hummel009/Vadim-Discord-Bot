@@ -1,6 +1,6 @@
 package io.github.hummel009.discord.vadim.service
 
-import com.github.hummel.vadim.bean.GuildData
+import io.github.hummel009.discord.vadim.bean.GuildData
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
 interface AccessService {

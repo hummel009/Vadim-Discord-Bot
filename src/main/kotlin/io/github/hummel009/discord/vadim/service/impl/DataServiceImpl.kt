@@ -1,12 +1,12 @@
 package io.github.hummel009.discord.vadim.service.impl
 
-import com.github.hummel.vadim.bean.GlobalData
-import com.github.hummel.vadim.bean.GuildData
-import com.github.hummel.vadim.dao.FileDao
-import com.github.hummel.vadim.dao.JsonDao
-import com.github.hummel.vadim.dao.ZipDao
-import com.github.hummel.vadim.factory.DaoFactory
-import com.github.hummel.vadim.service.DataService
+import io.github.hummel009.discord.vadim.bean.GlobalData
+import io.github.hummel009.discord.vadim.bean.GuildData
+import io.github.hummel009.discord.vadim.dao.FileDao
+import io.github.hummel009.discord.vadim.dao.JsonDao
+import io.github.hummel009.discord.vadim.dao.ZipDao
+import io.github.hummel009.discord.vadim.factory.DaoFactory
+import io.github.hummel009.discord.vadim.service.DataService
 import net.dv8tion.jda.api.entities.Guild
 
 class DataServiceImpl : DataService {

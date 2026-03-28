@@ -1,8 +1,8 @@
 package io.github.hummel009.discord.vadim.dao.impl
 
-import com.github.hummel.vadim.dao.FileDao
-import com.github.hummel.vadim.dao.ZipDao
-import com.github.hummel.vadim.factory.DaoFactory
+import io.github.hummel009.discord.vadim.dao.FileDao
+import io.github.hummel009.discord.vadim.dao.ZipDao
+import io.github.hummel009.discord.vadim.factory.DaoFactory
 import net.lingala.zip4j.ZipFile
 
 class ZipDaoImpl : ZipDao {

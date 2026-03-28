@@ -1,11 +1,11 @@
 package io.github.hummel009.discord.vadim.factory
 
-import com.github.hummel.vadim.dao.FileDao
-import com.github.hummel.vadim.dao.JsonDao
-import com.github.hummel.vadim.dao.ZipDao
-import com.github.hummel.vadim.dao.impl.FileDaoImpl
-import com.github.hummel.vadim.dao.impl.JsonDaoImpl
-import com.github.hummel.vadim.dao.impl.ZipDaoImpl
+import io.github.hummel009.discord.vadim.dao.FileDao
+import io.github.hummel009.discord.vadim.dao.JsonDao
+import io.github.hummel009.discord.vadim.dao.ZipDao
+import io.github.hummel009.discord.vadim.dao.impl.FileDaoImpl
+import io.github.hummel009.discord.vadim.dao.impl.JsonDaoImpl
+import io.github.hummel009.discord.vadim.dao.impl.ZipDaoImpl
 
 @Suppress("unused", "RedundantSuppression")
 object DaoFactory {
