@@ -16,15 +16,15 @@ fun main() {
 		val file = File("input/config.json")
 		if (file.exists()) {
 			FileReader(file).use {
-				val config = _root_ide_package_.io.github.hummel009.discord.vadim.utils.gson.fromJson(it, _root_ide_package_.io.github.hummel009.discord.vadim.Config::class.java)
+				val config = gson.fromJson(it, Config::class.java)
 
-				_root_ide_package_.io.github.hummel009.discord.vadim.launchWithData(config, "output")
+				launchWithData(config, "output")
 			}
 		} else {
-			_root_ide_package_.io.github.hummel009.discord.vadim.requestUserInput()
+			requestUserInput()
 		}
 	} catch (_: Exception) {
-		_root_ide_package_.io.github.hummel009.discord.vadim.requestUserInput()
+		requestUserInput()
 	}
 }
 
@@ -41,7 +41,7 @@ fun requestUserInput() {
 	print("Reinit? Type true/false: ")
 	val reinit = readln()
 
-	val config = _root_ide_package_.io.github.hummel009.discord.vadim.Config(
+	val config = Config(
 		discordToken,
 		telegramToken,
 		ownerId,
@@ -50,21 +50,21 @@ fun requestUserInput() {
 	try {
 		val file = File("input/config.json")
 		FileWriter(file).use {
-			_root_ide_package_.io.github.hummel009.discord.vadim.utils.gson.toJson(config, it)
+			gson.toJson(config, it)
 		}
 	} catch (e: Exception) {
 		e.printStackTrace()
 	}
 
-	_root_ide_package_.io.github.hummel009.discord.vadim.launchWithData(config, "output")
+	launchWithData(config, "output")
 }
 
-fun launchWithData(config: io.github.hummel009.discord.vadim.Config, root: String) {
-	_root_ide_package_.io.github.hummel009.discord.vadim.bean.BotData.discordToken = config.discordToken
-	_root_ide_package_.io.github.hummel009.discord.vadim.bean.BotData.telegramToken = config.telegramToken
-	_root_ide_package_.io.github.hummel009.discord.vadim.bean.BotData.ownerId = config.ownerId
-	_root_ide_package_.io.github.hummel009.discord.vadim.bean.BotData.root = root
+fun launchWithData(config: Config, root: String) {
+	BotData.discordToken = config.discordToken
+	BotData.telegramToken = config.telegramToken
+	BotData.ownerId = config.ownerId
+	BotData.root = root
 
-	val loginService = _root_ide_package_.io.github.hummel009.discord.vadim.factory.ServiceFactory.loginService
+	val loginService = ServiceFactory.loginService
 	loginService.loginBot(config.reinit)
 }
