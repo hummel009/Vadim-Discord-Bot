@@ -34,14 +34,14 @@ class MemberServiceImpl : MemberService {
 
 			val text = buildString {
 				val langName = I18n.of(guildData.lang, guildData)
-				append(I18n.of("info_language", guildData).format(langName), "\r\n")
+				append(I18n.of("info_language", guildData, langName), "\r\n")
 
 				if (guildData.managerRoleIds.isEmpty()) {
 					append("\r\n", I18n.of("no_manager_roles", guildData), "\r\n")
 				} else {
 					append("\r\n", I18n.of("has_manager_roles", guildData), "\r\n")
 					guildData.managerRoleIds.joinTo(this, "\r\n") {
-						I18n.of("manager_role", guildData).format(it)
+						I18n.of("manager_role", guildData, it)
 					}
 					append("\r\n")
 				}
@@ -51,14 +51,14 @@ class MemberServiceImpl : MemberService {
 				} else {
 					append("\r\n", I18n.of("has_connections", guildData), "\r\n")
 					guildData.localBus.joinTo(this, "\r\n") {
-						I18n.of("connection", guildData).format(it.discordChannelId, it.telegramChatId)
+						I18n.of("connection", guildData, it.discordChannelId, it.telegramChatId)
 					}
 					append("\r\n")
 				}
 			}
 			dataService.saveGuildData(guild, guildData)
 
-			val embed = EmbedBuilder().success(event.member, guildData, text)
+			val embed = EmbedBuilder().success(event.member, text)
 
 			event.hook.sendMessageEmbeds(embed).queue()
 		}

@@ -28,7 +28,7 @@ class OwnerServiceImpl : OwnerService {
 			val guildData = dataService.loadGuildData(guild)
 
 			if (!accessService.fromOwnerAtLeast(event)) {
-				val embed = EmbedBuilder().access(event.member, guildData, I18n.of("msg_access", guildData))
+				val embed = EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
 
 				event.hook.sendMessageEmbeds(embed).queue()
 			} else {
@@ -38,11 +38,11 @@ class OwnerServiceImpl : OwnerService {
 
 					dataService.importBotData(byteArray)
 
-					val embed = EmbedBuilder().success(event.member, guildData, I18n.of("import", guildData))
+					val embed = EmbedBuilder().success(event.member, I18n.of("import", guildData))
 
 					event.hook.sendMessageEmbeds(embed).queue()
 				} catch (_: Exception) {
-					val embed = EmbedBuilder().error(event.member, guildData, I18n.of("msg_error_format", guildData))
+					val embed = EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
 
 					event.hook.sendMessageEmbeds(embed).queue()
 				}
@@ -60,7 +60,7 @@ class OwnerServiceImpl : OwnerService {
 			val guildData = dataService.loadGuildData(guild)
 
 			if (!accessService.fromOwnerAtLeast(event)) {
-				val embed = EmbedBuilder().access(event.member, guildData, I18n.of("msg_access", guildData))
+				val embed = EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
 
 				event.hook.sendMessageEmbeds(embed).queue()
 			} else {
@@ -69,7 +69,7 @@ class OwnerServiceImpl : OwnerService {
 
 					event.hook.sendFiles(FileUpload.fromData(byteArray, "bot.zip")).queue()
 				} catch (_: Exception) {
-					val embed = EmbedBuilder().error(event.member, guildData, I18n.of("msg_error_format", guildData))
+					val embed = EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
 
 					event.hook.sendMessageEmbeds(embed).queue()
 				}
@@ -87,11 +87,11 @@ class OwnerServiceImpl : OwnerService {
 			val guildData = dataService.loadGuildData(guild)
 
 			if (!accessService.fromOwnerAtLeast(event)) {
-				val embed = EmbedBuilder().access(event.member, guildData, I18n.of("msg_access", guildData))
+				val embed = EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
 
 				event.hook.sendMessageEmbeds(embed).queue()
 			} else {
-				val embed = EmbedBuilder().success(event.member, guildData, I18n.of("exit", guildData))
+				val embed = EmbedBuilder().success(event.member, I18n.of("exit", guildData))
 
 				event.hook.sendMessageEmbeds(embed).queue {
 					exitProcess(0)
