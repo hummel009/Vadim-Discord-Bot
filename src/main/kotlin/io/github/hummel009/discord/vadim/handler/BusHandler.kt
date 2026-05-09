@@ -320,7 +320,6 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 				val finalFileName = if (hasSpoiler) "SPOILER_$fileName" else fileName
 
 				sendTextMessages(message, replyId)
-				channel.sendMessage("\u200B").queue()
 				channel.sendFiles(FileUpload.fromData(result, finalFileName)).queue()
 			}
 
