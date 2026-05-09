@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication
 import org.telegram.telegrambots.meta.generics.TelegramClient
-import kotlin.use
 
 object ApiHolder {
 	val discord: JDA by lazy {
