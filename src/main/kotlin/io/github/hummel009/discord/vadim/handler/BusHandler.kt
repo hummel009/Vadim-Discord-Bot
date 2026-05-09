@@ -100,11 +100,11 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 				val separator = if (content.contains("[\n\r]".toRegex())) "\n\n" else " "
 
 				append("\\#")
-				append(author.escape())
-				append(answer.escape())
+				append(author.escapeMarkdown())
+				append(answer.escapeMarkdown())
 				append(":")
 				append(separator)
-				append(content.escape())
+				append(content.escapeMarkdown())
 				append(id)
 			}
 
@@ -388,7 +388,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 		}
 	}
 
-	private fun String.escape(): String {
+	private fun String.escapeMarkdown(): String {
 		val specialChars = listOf(
 			'_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'
 		)
