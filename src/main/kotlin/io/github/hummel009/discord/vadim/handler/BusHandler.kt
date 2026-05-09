@@ -1,9 +1,9 @@
 package io.github.hummel009.discord.vadim.handler
 
 import io.github.hummel009.discord.vadim.ApiHolder
-import io.github.hummel009.discord.vadim.bean.BotData
 import io.github.hummel009.discord.vadim.factory.ServiceFactory
 import io.github.hummel009.discord.vadim.service.DataService
+import io.github.hummel009.discord.vadim.utils.config
 import io.github.hummel009.discord.vadim.utils.decode
 import io.github.hummel009.discord.vadim.utils.encode
 import io.github.hummel009.discord.vadim.utils.escapeMarkdownV2
@@ -299,7 +299,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 				) ?: return
 
 				fun sendFile(fileId: String, fileName: String, isImageAndResize: Boolean = false) {
-					val url = ApiHolder.telegram.execute(GetFile(fileId)).getFileUrl(BotData.telegramToken)
+					val url = ApiHolder.telegram.execute(GetFile(fileId)).getFileUrl(config.telegramToken)
 					val byteArray = URL(url).readBytes()
 					val result = if (isImageAndResize) byteArray.resizeImage(160) else byteArray
 					val finalFileName = if (hasSpoiler) "SPOILER_$fileName" else fileName

@@ -1,49 +1,18 @@
 package io.github.hummel009.discord.vadim.service.impl
 
 import io.github.hummel009.discord.vadim.ApiHolder
-import io.github.hummel009.discord.vadim.bean.BotData
-import io.github.hummel009.discord.vadim.handler.BusHandler
-import io.github.hummel009.discord.vadim.handler.EventHandler
-import io.github.hummel009.discord.vadim.service.LoginService
-import net.dv8tion.jda.api.JDABuilder
+import io.github.hummel009.discord.vadim.service.StartService
+import io.github.hummel009.discord.vadim.utils.config
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
-import net.dv8tion.jda.api.requests.GatewayIntent
-import net.dv8tion.jda.api.utils.MemberCachePolicy
-import net.dv8tion.jda.api.utils.cache.CacheFlag
-import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient
-import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication
-import kotlin.concurrent.thread
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 
-class LoginServiceImpl : LoginService {
-	override fun loginBot(reinit: Boolean) {
-		thread {
-			ApiHolder.discord = JDABuilder.createDefault(BotData.discordToken).apply {
-				enableIntents(GatewayIntent.getIntents(GatewayIntent.ALL_INTENTS))
-				enableCache(CacheFlag.entries)
-				setMemberCachePolicy(MemberCachePolicy.ALL)
-				addEventListeners(EventHandler, BusHandler)
-			}.build().awaitReady()
-
-			if (reinit) {
-				recreateCommands()
-			}
+class StartServiceImpl : StartService {
+	override fun recreateCommands() {
+		if (!config.reinit) {
+			return
 		}
-
-		thread {
-			ApiHolder.telegram = OkHttpTelegramClient(BotData.telegramToken)
-
-			TelegramBotsLongPollingApplication().use {
-				it.registerBot(BotData.telegramToken, BusHandler)
-				Thread.currentThread().join()
-			}
-		}
-	}
-
-	private fun recreateCommands() {
-		fun String.cmd(description: String, options: List<OptionData>) =
-			Commands.slash(this, description).addOptions(options)
 
 		val commands = listOf(
 			"info".cmd("/info", empty()),
@@ -65,8 +34,12 @@ class LoginServiceImpl : LoginService {
 			"export".cmd("/export", empty()),
 			"exit".cmd("/exit", empty())
 		)
+
 		ApiHolder.discord.updateCommands().addCommands(commands).complete()
 	}
+
+	private fun String.cmd(description: String, options: List<OptionData>): SlashCommandData =
+		Commands.slash(this, description).addOptions(options)
 
 	private fun empty(): List<OptionData> = emptyList()
 

@@ -1,34 +1,28 @@
 package io.github.hummel009.discord.vadim
 
-import io.github.hummel009.discord.vadim.bean.BotData
-import io.github.hummel009.discord.vadim.factory.ServiceFactory
 import io.github.hummel009.discord.vadim.utils.gson
+import io.github.hummel009.discord.vadim.utils.input
 import java.io.File
-import java.io.FileReader
 import java.io.FileWriter
+import kotlin.concurrent.thread
 
 data class Config(
 	val discordToken: String, val telegramToken: String, val ownerId: String, val reinit: Boolean
 )
 
 fun main() {
-	try {
-		val file = File("input/config.json")
-		if (file.exists()) {
-			FileReader(file).use {
-				val config = gson.fromJson(it, Config::class.java)
+	ensureConfigExists()
 
-				launchWithData(config, "output")
-			}
-		} else {
-			requestUserInput()
-		}
-	} catch (_: Exception) {
-		requestUserInput()
-	}
+	thread { ApiHolder.establishDiscordConnection() }
+	thread { ApiHolder.establishTelegramConnection() }
 }
 
-fun requestUserInput() {
+fun ensureConfigExists() {
+	val file = File(input, "config.json")
+	if (file.exists()) {
+		return
+	}
+
 	print("Enter the Discord Token: ")
 	val discordToken = readln()
 
@@ -41,30 +35,7 @@ fun requestUserInput() {
 	print("Reinit? Type true/false: ")
 	val reinit = readln()
 
-	val config = Config(
-		discordToken,
-		telegramToken,
-		ownerId,
-		reinit.toBoolean()
-	)
-	try {
-		val file = File("input/config.json")
-		FileWriter(file).use {
-			gson.toJson(config, it)
-		}
-	} catch (e: Exception) {
-		e.printStackTrace()
+	FileWriter(file).use {
+		gson.toJson(Config(discordToken, telegramToken, ownerId, reinit.toBoolean()), it)
 	}
-
-	launchWithData(config, "output")
-}
-
-fun launchWithData(config: Config, root: String) {
-	BotData.discordToken = config.discordToken
-	BotData.telegramToken = config.telegramToken
-	BotData.ownerId = config.ownerId
-	BotData.root = root
-
-	val loginService = ServiceFactory.loginService
-	loginService.loginBot(config.reinit)
 }
