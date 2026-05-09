@@ -85,7 +85,7 @@ class DataServiceImpl : DataService {
 
 	private fun initAndGetGuildData(guild: Guild): GuildData = GuildData(
 		guildName = guild.name,
-		lang = "ru",
+		lang = "en",
 		managerRoleIds = mutableSetOf(),
 		localBus = mutableSetOf()
 	)
