@@ -7,6 +7,7 @@ import io.github.hummel009.discord.vadim.dao.JsonDao
 import io.github.hummel009.discord.vadim.dao.ZipDao
 import io.github.hummel009.discord.vadim.factory.DaoFactory
 import io.github.hummel009.discord.vadim.service.DataService
+import io.github.hummel009.discord.vadim.utils.Lang
 import net.dv8tion.jda.api.entities.Guild
 
 class DataServiceImpl : DataService {
@@ -85,7 +86,7 @@ class DataServiceImpl : DataService {
 
 	private fun initAndGetGuildData(guild: Guild): GuildData = GuildData(
 		guildName = guild.name,
-		lang = "en",
+		lang = Lang.ENGLISH,
 		managerRoleIds = mutableSetOf(),
 		localBus = mutableSetOf()
 	)

@@ -2,6 +2,7 @@ package io.github.hummel009.discord.vadim.service.impl
 
 import io.github.hummel009.discord.vadim.ApiHolder
 import io.github.hummel009.discord.vadim.service.StartService
+import io.github.hummel009.discord.vadim.utils.Lang
 import io.github.hummel009.discord.vadim.utils.config
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
@@ -24,7 +25,7 @@ class StartServiceImpl : StartService {
 
 			withStringOption("add_connection", "[discord_channel_id] [telegram_chat_id]"),
 			withStringOption("add_manager_role", "[role_id]"),
-			withStringOption("set_language", "[ru/be/uk/en]"),
+			withStringOption("set_language", "[${Lang.entries.joinToString("/")}]"),
 
 			withStringOption("clear_connections", "{discord_channel_id} {telegram_chat_id}", false),
 			withStringOption("clear_manager_roles", "{role_id}", false),

@@ -6,6 +6,7 @@ import io.github.hummel009.discord.vadim.service.AccessService
 import io.github.hummel009.discord.vadim.service.DataService
 import io.github.hummel009.discord.vadim.service.ManagerService
 import io.github.hummel009.discord.vadim.utils.I18n
+import io.github.hummel009.discord.vadim.utils.Lang
 import io.github.hummel009.discord.vadim.utils.access
 import io.github.hummel009.discord.vadim.utils.error
 import io.github.hummel009.discord.vadim.utils.success
@@ -32,15 +33,11 @@ class ManagerServiceImpl : ManagerService {
 
 				if (arguments.size == 1) {
 					try {
-						val lang = arguments[0]
-
-						if (lang !in listOf("ru", "be", "uk", "en")) {
-							throw Exception()
-						}
+						val lang = Lang.of(arguments[0]) ?: throw Exception()
 
 						guildData.lang = lang
 
-						val langName = I18n.of(lang, guildData)
+						val langName = I18n.of(lang.code, guildData)
 
 						EmbedBuilder().success(
 							event.member, I18n.of("set_language", guildData, langName)
