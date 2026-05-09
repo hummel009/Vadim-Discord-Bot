@@ -41,7 +41,7 @@ class MemberServiceImpl : MemberService {
 				} else {
 					append("\n", I18n.of("has_manager_roles", guildData), "\n")
 					guildData.managerRoleIds.joinTo(this, "\n") {
-						I18n.of("manager_role", guildData, it)
+						I18n.of("manager_role", guildData, it).s()
 					}
 					append("\n")
 				}
@@ -51,14 +51,14 @@ class MemberServiceImpl : MemberService {
 				} else {
 					append("\n", I18n.of("has_connections", guildData), "\n")
 					guildData.localBus.joinTo(this, "\n") {
-						I18n.of("connection", guildData, it.discordChannelId, it.telegramChatId)
+						I18n.of("connection", guildData, it.discordChannelId, it.telegramChatId).s()
 					}
 					append("\n")
 				}
 			}
 			dataService.saveGuildData(guild, guildData)
 
-			val embed = EmbedBuilder().success(event.member, text)
+			val embed = EmbedBuilder().success(event.member, I18n(text, guildData.lang))
 
 			event.hook.sendMessageEmbeds(embed).queue()
 		}
