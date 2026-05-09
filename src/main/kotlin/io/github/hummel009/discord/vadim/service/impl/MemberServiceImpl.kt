@@ -34,26 +34,26 @@ class MemberServiceImpl : MemberService {
 
 			val text = buildString {
 				val langName = I18n.of(guildData.lang, guildData)
-				append(I18n.of("info_language", guildData, langName), "\r\n")
+				append(I18n.of("info_language", guildData, langName), "\n")
 
 				if (guildData.managerRoleIds.isEmpty()) {
-					append("\r\n", I18n.of("no_manager_roles", guildData), "\r\n")
+					append("\n", I18n.of("no_manager_roles", guildData), "\n")
 				} else {
-					append("\r\n", I18n.of("has_manager_roles", guildData), "\r\n")
-					guildData.managerRoleIds.joinTo(this, "\r\n") {
+					append("\n", I18n.of("has_manager_roles", guildData), "\n")
+					guildData.managerRoleIds.joinTo(this, "\n") {
 						I18n.of("manager_role", guildData, it)
 					}
-					append("\r\n")
+					append("\n")
 				}
 
 				if (guildData.localBus.isEmpty()) {
-					append("\r\n", I18n.of("no_connections", guildData), "\r\n")
+					append("\n", I18n.of("no_connections", guildData), "\n")
 				} else {
-					append("\r\n", I18n.of("has_connections", guildData), "\r\n")
-					guildData.localBus.joinTo(this, "\r\n") {
+					append("\n", I18n.of("has_connections", guildData), "\n")
+					guildData.localBus.joinTo(this, "\n") {
 						I18n.of("connection", guildData, it.discordChannelId, it.telegramChatId)
 					}
-					append("\r\n")
+					append("\n")
 				}
 			}
 			dataService.saveGuildData(guild, guildData)

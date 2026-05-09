@@ -96,7 +96,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 						" ➦ «${displayText}»"
 					}
 				} else ""
-				val id = "\r\n`औ${event.message.idLong.encode()}`"
+				val id = "\n`औ${event.message.idLong.encode()}`"
 				val separator = if (content.contains("[\n\r]".toRegex())) "\n\n" else " "
 
 				append("\\#")
