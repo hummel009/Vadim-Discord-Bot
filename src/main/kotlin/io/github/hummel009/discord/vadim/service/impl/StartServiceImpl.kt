@@ -15,39 +15,33 @@ class StartServiceImpl : StartService {
 		}
 
 		val commands = listOf(
-			"info".cmd("/info", empty()),
+			withoutOptions("info", "/info"),
+			withoutOptions("wipe_data", "/wipe_data"),
+			withoutOptions("commit", "/exit"),
+			withoutOptions("uncommit", "/uncommit"),
+			withoutOptions("export", "/export"),
+			withoutOptions("exit", "/exit"),
 
-			"set_language".cmd("/set_language [ru/be/uk/en]", string()),
+			withStringOption("set_language", "/set_language [ru/be/uk/en]"),
+			withStringOption("add_manager_role", "/add_manager_role [role_id]"),
+			withStringOption("clear_manager_roles", "/clear_manager_roles {role_id}", false),
+			withStringOption("add_connection", "/add_connection [discord_channel_id] [telegram_chat_id]"),
+			withStringOption("clear_connections", "/clear_connections {discord_channel_id} {telegram_chat_id}", false),
 
-			"add_manager_role".cmd("/add_manager_role [role_id]", string()),
-			"clear_manager_roles".cmd("/clear_manager_roles {role_id}", string(false)),
-
-			"add_connection".cmd("/add_connection [discord_channel_id] [telegram_chat_id]", string()),
-			"clear_connections".cmd("/clear_connections {discord_channel_id} {telegram_chat_id}", string(false)),
-
-			"commit".cmd("/commit", empty()),
-			"uncommit".cmd("/uncommit", string(false)),
-
-			"wipe_data".cmd("/wipe_data", empty()),
-
-			"import".cmd("/import", attachment()),
-			"export".cmd("/export", empty()),
-			"exit".cmd("/exit", empty())
+			withAttachmentOption("import", "/import")
 		)
 
 		ApiHolder.discord.updateCommands().addCommands(commands).complete()
 	}
 
-	private fun String.cmd(description: String, options: List<OptionData>): SlashCommandData =
-		Commands.slash(this, description).addOptions(options)
+	private fun withoutOptions(name: String, description: String): SlashCommandData =
+		Commands.slash(name, description).addOptions(emptyList())
 
-	private fun empty(): List<OptionData> = emptyList()
+	private fun withStringOption(name: String, description: String, obligatory: Boolean = true): SlashCommandData =
+		Commands.slash(name, description)
+			.addOptions(OptionData(OptionType.STRING, "arguments", "The list of arguments", obligatory))
 
-	private fun string(obligatory: Boolean = true): List<OptionData> = listOf(
-		OptionData(OptionType.STRING, "arguments", "The list of arguments", obligatory)
-	)
-
-	private fun attachment(): List<OptionData> = listOf(
-		OptionData(OptionType.ATTACHMENT, "arguments", "The list of arguments", true)
-	)
+	private fun withAttachmentOption(name: String, description: String, obligatory: Boolean = true): SlashCommandData =
+		Commands.slash(name, description)
+			.addOptions(OptionData(OptionType.ATTACHMENT, "arguments", "The list of arguments", obligatory))
 }
