@@ -58,7 +58,7 @@ class MemberServiceImpl : MemberService {
 			}
 			dataService.saveGuildData(guild, guildData)
 
-			val embed = EmbedBuilder().success(event.member, I18n(text, guildData.lang))
+			val embed = EmbedBuilder().success(event.member, I18n.new(text, guildData.lang))
 
 			event.hook.sendMessageEmbeds(embed).queue()
 		}
