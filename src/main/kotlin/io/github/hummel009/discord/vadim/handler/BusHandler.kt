@@ -3,9 +3,10 @@ package io.github.hummel009.discord.vadim.handler
 import io.github.hummel009.discord.vadim.ApiHolder
 import io.github.hummel009.discord.vadim.factory.ServiceFactory
 import io.github.hummel009.discord.vadim.service.DataService
+import io.github.hummel009.discord.vadim.utils.MessageEncoder.decode
+import io.github.hummel009.discord.vadim.utils.MessageEncoder.encode
+import io.github.hummel009.discord.vadim.utils.MessageSplitter.splitMessage
 import io.github.hummel009.discord.vadim.utils.config
-import io.github.hummel009.discord.vadim.utils.decode
-import io.github.hummel009.discord.vadim.utils.encode
 import io.github.hummel009.discord.vadim.utils.escapeMarkdownV2
 import io.github.hummel009.discord.vadim.utils.resizeImage
 import net.dv8tion.jda.api.events.GenericEvent
@@ -279,7 +280,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 							" ➦ «$displayText»"
 						}
 					} else ""
-					val id = "\r\n-# औ${update.message.messageId.toLong().encode()}"
+					val id = "\n-# औ${update.message.messageId.toLong().encode()}"
 					val separator = if (content.contains("[\n\r]".toRegex())) "\n\n" else " "
 
 					append("__#")
@@ -298,16 +299,27 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 					discordChannelId
 				) ?: return
 
+				fun sendTextMessages(text: String, replyToId: String? = null) {
+					val parts = text.splitMessage()
+					parts.forEachIndexed { index, part ->
+						channel.sendMessage(part).apply {
+							if (index == 0 && replyToId != null) {
+								setMessageReference(replyToId.decode())
+							}
+							queue()
+						}
+					}
+				}
+
 				fun sendFile(fileId: String, fileName: String, isImageAndResize: Boolean = false) {
 					val url = ApiHolder.telegram.execute(GetFile(fileId)).getFileUrl(config.telegramToken)
 					val byteArray = URL(url).readBytes()
 					val result = if (isImageAndResize) byteArray.resizeImage(160) else byteArray
 					val finalFileName = if (hasSpoiler) "SPOILER_$fileName" else fileName
-					channel.sendMessage(message).apply {
-						addFiles(FileUpload.fromData(result, finalFileName))
-						replyId?.let { setMessageReference(it.decode()) }
-						queue()
-					}
+
+					sendTextMessages(message, replyId)
+					channel.sendMessage("\u200B").queue()
+					channel.sendFiles(FileUpload.fromData(result, finalFileName)).queue()
 				}
 
 				when {
@@ -368,10 +380,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 					}
 
 					else -> {
-						channel.sendMessage(message).apply {
-							replyId?.let { setMessageReference(it.decode()) }
-							queue()
-						}
+						sendTextMessages(message, replyId)
 					}
 				}
 			} catch (_: Exception) {
