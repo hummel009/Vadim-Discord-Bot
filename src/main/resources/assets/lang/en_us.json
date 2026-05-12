@@ -27,5 +27,6 @@
 	"be": "belarusian",
 	"en": "english",
 	"ru": "russian",
-	"uk": "ukrainian"
+	"uk": "ukrainian",
+	"file_limit": "One or more files were not sent because they were larger than 10 MB."
 }

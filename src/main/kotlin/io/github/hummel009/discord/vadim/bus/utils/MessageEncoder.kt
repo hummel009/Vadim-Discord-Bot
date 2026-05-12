@@ -1,4 +1,6 @@
-package io.github.hummel009.discord.vadim.utils
+package io.github.hummel009.discord.vadim.bus.utils
+
+const val signatureStart: String = "औ"
 
 private val alphabet: List<Char> = listOf(
 	'इ',

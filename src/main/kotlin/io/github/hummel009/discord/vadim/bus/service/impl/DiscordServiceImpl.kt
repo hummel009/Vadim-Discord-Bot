@@ -1,0 +1,245 @@
+package io.github.hummel009.discord.vadim.bus.service.impl
+
+import io.github.hummel009.discord.vadim.ApiHolder
+import io.github.hummel009.discord.vadim.bean.GuildData
+import io.github.hummel009.discord.vadim.bus.bean.FileWrapper
+import io.github.hummel009.discord.vadim.bus.bean.MessageWrapper
+import io.github.hummel009.discord.vadim.bus.service.DiscordService
+import io.github.hummel009.discord.vadim.bus.utils.FileType
+import io.github.hummel009.discord.vadim.dao.FileDao
+import io.github.hummel009.discord.vadim.factory.DaoFactory
+import io.github.hummel009.discord.vadim.utils.I18n
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.utils.FileProxy
+import org.telegram.telegrambots.meta.api.methods.ParseMode
+import org.telegram.telegrambots.meta.api.methods.send.*
+import org.telegram.telegrambots.meta.api.objects.InputFile
+
+class DiscordServiceImpl : DiscordService {
+	private val fileDao: FileDao = DaoFactory.fileDao
+
+	override fun receive(event: MessageReceivedEvent): MessageWrapper {
+		val fileWrappers = mutableListOf<FileWrapper?>()
+
+		for (attachment in event.message.attachments) {
+			val fileExtension = attachment.fileExtension?.lowercase()
+
+			when {
+				listOf("png", "jpg", "jpeg").any {
+					fileExtension?.lowercase() == it
+				} -> {
+					if (attachment.size <= 9_999_999) {
+						val fileBytes = FileProxy(attachment.proxyUrl).download().join().readBytes()
+
+						fileWrappers.add(
+							FileWrapper(fileBytes, "jpg", FileType.PHOTO, attachment.isSpoiler)
+						)
+					} else {
+						fileWrappers.add(null)
+					}
+				}
+
+				listOf("mp4").any {
+					fileExtension?.lowercase() == it
+				} -> {
+					if (attachment.size <= 9_999_999) {
+						val fileBytes = FileProxy(attachment.proxyUrl).download().join().readBytes()
+
+						fileWrappers.add(
+							FileWrapper(fileBytes, "mp4", FileType.VIDEO, attachment.isSpoiler)
+						)
+					} else {
+						fileWrappers.add(null)
+					}
+				}
+
+				listOf("mp3").any {
+					fileExtension?.lowercase() == it
+				} -> {
+					if (attachment.size <= 9_999_999) {
+						val fileBytes = FileProxy(attachment.proxyUrl).download().join().readBytes()
+
+						fileWrappers.add(
+							FileWrapper(fileBytes, "mp3", FileType.AUDIO, attachment.isSpoiler)
+						)
+					} else {
+						fileWrappers.add(null)
+					}
+				}
+
+				listOf("ogg").any {
+					fileExtension?.lowercase() == it
+				} -> {
+					if (attachment.size <= 9_999_999) {
+						val fileBytes = FileProxy(attachment.proxyUrl).download().join().readBytes()
+
+						fileWrappers.add(
+							FileWrapper(fileBytes, "ogg", FileType.VOICE, attachment.isSpoiler)
+						)
+					} else {
+						fileWrappers.add(null)
+					}
+				}
+
+				listOf("gif").any {
+					fileExtension?.lowercase() == it
+				} -> {
+					if (attachment.size <= 9_999_999) {
+						val fileBytes = FileProxy(attachment.proxyUrl).download().join().readBytes()
+
+						fileWrappers.add(
+							FileWrapper(fileBytes, "gif", FileType.GIF, attachment.isSpoiler)
+						)
+					} else {
+						fileWrappers.add(null)
+					}
+				}
+
+				else -> {
+					if (attachment.size <= 9_999_999) {
+						val fileBytes = FileProxy(attachment.proxyUrl).download().join().readBytes()
+
+						fileWrappers.add(
+							FileWrapper(fileBytes, fileExtension, FileType.DOC, attachment.isSpoiler)
+						)
+					} else {
+						fileWrappers.add(null)
+					}
+				}
+			}
+		}
+
+		return MessageWrapper(
+			event.message.author.effectiveName,
+			event.message.contentStripped,
+			event.message.referencedMessage?.contentStripped,
+			event.message.id,
+			fileWrappers
+		)
+	}
+
+	override fun send(m: MessageWrapper, telegramChatId: Long, guildData: GuildData) {
+		val msg = m.textMessage
+
+		if (!m.isCaption()) {
+			ApiHolder.telegram.execute(SendMessage.builder().apply {
+				chatId(telegramChatId)
+				text(msg)
+				parseMode(ParseMode.MARKDOWNV2)
+				if (m.replyToIdIfOtherSide != null) {
+					replyToMessageId(m.replyToIdIfOtherSide.toInt())
+				}
+			}.build())
+		}
+
+		for (fw in m.fileWrappers) {
+			when (fw.fileType) {
+				FileType.PHOTO -> {
+					val filePath = fw.allocateWithPath()
+					val file = fileDao.getFile(filePath)
+
+					ApiHolder.telegram.execute(SendPhoto.builder().apply {
+						chatId(telegramChatId)
+						photo(InputFile(file))
+						hasSpoiler(fw.isSpoiler)
+						if (m.isCaption()) {
+							parseMode(ParseMode.MARKDOWNV2)
+							caption(msg)
+						}
+					}.build())
+
+					fw.freeWithPath(filePath)
+				}
+
+				FileType.VIDEO -> {
+					val filePath = fw.allocateWithPath()
+					val file = fileDao.getFile(filePath)
+
+					ApiHolder.telegram.execute(SendVideo.builder().apply {
+						chatId(telegramChatId)
+						video(InputFile(file))
+						hasSpoiler(fw.isSpoiler)
+						if (m.isCaption()) {
+							parseMode(ParseMode.MARKDOWNV2)
+							caption(msg)
+						}
+					}.build())
+
+					fw.freeWithPath(filePath)
+				}
+
+				FileType.AUDIO -> {
+					val filePath = fw.allocateWithPath()
+					val file = fileDao.getFile(filePath)
+
+					ApiHolder.telegram.execute(SendAudio.builder().apply {
+						chatId(telegramChatId)
+						audio(InputFile(file))
+						if (m.isCaption()) {
+							parseMode(ParseMode.MARKDOWNV2)
+							caption(msg)
+						}
+					}.build())
+
+					fw.freeWithPath(filePath)
+				}
+
+				FileType.VOICE -> {
+					val filePath = fw.allocateWithPath()
+					val file = fileDao.getFile(filePath)
+
+					ApiHolder.telegram.execute(SendVoice.builder().apply {
+						chatId(telegramChatId)
+						voice(InputFile(file))
+						if (m.isCaption()) {
+							parseMode(ParseMode.MARKDOWNV2)
+							caption(msg)
+						}
+					}.build())
+
+					fw.freeWithPath(filePath)
+				}
+
+				FileType.GIF -> {
+					val filePath = fw.allocateWithPath()
+					val file = fileDao.getFile(filePath)
+
+					ApiHolder.telegram.execute(SendAnimation.builder().apply {
+						chatId(telegramChatId)
+						animation(InputFile(file))
+						hasSpoiler(fw.isSpoiler)
+						if (m.isCaption()) {
+							parseMode(ParseMode.MARKDOWNV2)
+							caption(msg)
+						}
+					}.build())
+
+					fw.freeWithPath(filePath)
+				}
+
+				FileType.DOC -> {
+					val filePath = fw.allocateWithPath()
+					val file = fileDao.getFile(filePath)
+
+					ApiHolder.telegram.execute(SendDocument.builder().apply {
+						chatId(telegramChatId)
+						document(InputFile(file))
+						if (m.isCaption()) {
+							parseMode(ParseMode.MARKDOWNV2)
+							caption(msg)
+						}
+					}.build())
+
+					fw.freeWithPath(filePath)
+				}
+
+				FileType.NULL -> {
+					ApiHolder.telegram.execute(SendMessage.builder().apply {
+						chatId(telegramChatId)
+						text("`${I18n.of("file_limit", guildData).s()}`")
+					}.build())
+				}
+			}
+		}
+	}
+}

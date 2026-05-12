@@ -5,11 +5,7 @@ import io.github.hummel009.discord.vadim.factory.ServiceFactory
 import io.github.hummel009.discord.vadim.service.AccessService
 import io.github.hummel009.discord.vadim.service.DataService
 import io.github.hummel009.discord.vadim.service.ManagerService
-import io.github.hummel009.discord.vadim.utils.I18n
-import io.github.hummel009.discord.vadim.utils.Lang
-import io.github.hummel009.discord.vadim.utils.access
-import io.github.hummel009.discord.vadim.utils.error
-import io.github.hummel009.discord.vadim.utils.success
+import io.github.hummel009.discord.vadim.utils.*
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 

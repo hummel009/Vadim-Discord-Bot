@@ -1,4 +1,4 @@
-package io.github.hummel009.discord.vadim.utils
+package io.github.hummel009.discord.vadim.bus.utils
 
 private const val MAX_LENGTH: Int = 1999
 

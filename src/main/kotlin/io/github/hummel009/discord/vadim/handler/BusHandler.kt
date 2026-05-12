@@ -1,38 +1,21 @@
 package io.github.hummel009.discord.vadim.handler
 
 import io.github.hummel009.discord.vadim.ApiHolder
+import io.github.hummel009.discord.vadim.bus.service.DiscordService
+import io.github.hummel009.discord.vadim.bus.service.TelegramService
 import io.github.hummel009.discord.vadim.factory.ServiceFactory
 import io.github.hummel009.discord.vadim.service.DataService
-import io.github.hummel009.discord.vadim.utils.config
-import io.github.hummel009.discord.vadim.utils.decode
-import io.github.hummel009.discord.vadim.utils.encode
-import io.github.hummel009.discord.vadim.utils.split
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.EventListener
-import net.dv8tion.jda.api.utils.FileProxy
-import net.dv8tion.jda.api.utils.FileUpload
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer
-import org.telegram.telegrambots.meta.api.methods.GetFile
-import org.telegram.telegrambots.meta.api.methods.ParseMode
-import org.telegram.telegrambots.meta.api.methods.send.*
-import org.telegram.telegrambots.meta.api.objects.InputFile
 import org.telegram.telegrambots.meta.api.objects.Update
-import org.telegram.telegrambots.meta.api.objects.media.InputMediaAudio
-import org.telegram.telegrambots.meta.api.objects.media.InputMediaDocument
-import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto
-import org.telegram.telegrambots.meta.api.objects.media.InputMediaVideo
-import java.awt.Image
-import java.awt.image.BufferedImage
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.net.URL
-import java.nio.file.Files
-import javax.imageio.ImageIO
 
 object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 	private val dataService: DataService = ServiceFactory.dataService
+
+	private val discordService: DiscordService = ServiceFactory.discordService
+	private val telegramService: TelegramService = ServiceFactory.telegramService
 
 	override fun onEvent(event: GenericEvent) {
 		if (event is MessageReceivedEvent) {
@@ -47,7 +30,10 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 				it.discordChannelId == discordChannelId
 			}?.telegramChatId ?: return
 
-			transferToTelegram(event, telegramChatId)
+			val guildData = dataService.loadGuildData(event.guild)
+
+			val messageWrapper = discordService.receive(event)
+			discordService.send(messageWrapper, telegramChatId, guildData)
 		}
 	}
 
@@ -64,360 +50,16 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 				it.telegramChatId == telegramChatId
 			}?.discordChannelId ?: return
 
-			transferToDiscord(update, discordChannelId)
-		}
-	}
-
-	private fun transferToTelegram(event: MessageReceivedEvent, telegramChatId: Long) {
-		try {
-			val reference = event.message.referencedMessage
-			val referenceId = reference?.contentStripped?.takeIf {
-				it.contains("औ")
-			}?.substringAfter("औ")
-
-			val ownSide = reference != null && referenceId == null
-
-			val message = buildString {
-				val content = event.message.contentStripped
-				val author = with(event.message.author.effectiveName) {
-					replace("  ", " ").replace(" ", "_")
-				}
-				val answer = if (ownSide) {
-					val maxLength = 30
-					val originalText = reference.contentStripped
-					val displayText = if (originalText.length > maxLength) {
-						originalText.take(maxLength) + "..."
-					} else {
-						originalText
-					}
-					if (displayText.isEmpty()) {
-						""
-					} else {
-						" ➦ «${displayText}»"
-					}
-				} else ""
-				val id = "\n`औ${event.message.idLong.encode()}`"
-				val separator = if (content.contains("[\n\r]".toRegex())) "\n\n" else " "
-
-				append("\\#")
-				append(author.escapeMarkdown())
-				append(answer.escapeMarkdown())
-				append(":")
-				append(separator)
-				append(content.escapeMarkdown())
-				append(id)
-			}
-
-			ApiHolder.telegram.execute(SendMessage.builder().apply {
-				chatId(telegramChatId)
-				text(message)
-				parseMode(ParseMode.MARKDOWNV2)
-				referenceId?.let { replyToMessageId(it.decode().toInt()) }
-			}.build())
-
-			val attachments = event.message.attachments
-			val stickers = event.message.stickers
-			if (attachments.isEmpty() && stickers.isEmpty()) {
-				return
-			}
-
-			val images = mutableListOf<Pair<File, Boolean>>()
-			val videos = mutableListOf<Pair<File, Boolean>>()
-			val audios = mutableListOf<File>()
-			val gifs = mutableListOf<File>()
-			val documents = mutableListOf<File>()
-
-			val tempDir = Files.createTempDirectory("discord_attachments_")
-			val tempFiles = mutableListOf<File>()
-
-			try {
-				for (attachment in attachments) {
-					if (attachment.size >= 9_999_999) {
-						continue
-					}
-					val byteArray = FileProxy(attachment.proxyUrl).download().join().readBytes()
-					val tempFile = tempDir.resolve("${System.currentTimeMillis()}_${attachment.fileName}").toFile()
-					tempFile.writeBytes(byteArray)
-					tempFiles.add(tempFile)
-
-					val hasSpoiler = attachment.isSpoiler
-
-					when {
-						listOf("jpg", "jpeg", "png").any {
-							attachment.fileName.lowercase().contains(it)
-						} -> images.add(tempFile to hasSpoiler)
-
-						listOf("mp4", "mov", "mpg", "mpeg").any {
-							attachment.fileName.lowercase().contains(it)
-						} -> videos.add(tempFile to hasSpoiler)
-
-						listOf("mp3", "wav", "ogg", "m4a").any {
-							attachment.fileName.lowercase().contains(it)
-						} -> audios.add(tempFile)
-
-						attachment.fileName.lowercase().contains("gif") -> gifs.add(tempFile)
-
-						else -> documents.add(tempFile)
-					}
-				}
-				for (sticker in stickers) {
-					val url = sticker.iconUrl
-					if (url.contains(".json")) {
-						continue
-					}
-
-					val byteArray = URL(url).readBytes()
-					val extension = url.substringAfterLast('.', "").lowercase()
-					val fileName = "${sticker.id}.$extension"
-					val tempFile = tempDir.resolve(fileName).toFile()
-					tempFile.writeBytes(byteArray)
-					tempFiles.add(tempFile)
-
-					when (extension) {
-						"jpg", "jpeg", "png" -> images.add(tempFile to false)
-						"gif" -> gifs.add(tempFile)
-					}
-				}
-
-				if (images.size > 1) {
-					ApiHolder.telegram.execute(SendMediaGroup.builder().apply {
-						chatId("$telegramChatId")
-						medias(images.map { (image, spoiler) ->
-							InputMediaPhoto(image, image.name).apply { hasSpoiler = spoiler }
-						})
-					}.build())
-				} else if (images.size == 1) {
-					ApiHolder.telegram.execute(SendPhoto.builder().apply {
-						chatId(telegramChatId)
-						photo(InputFile(images[0].first))
-						hasSpoiler(images[0].second)
-					}.build())
-				}
-
-				if (videos.size > 1) {
-					ApiHolder.telegram.execute(SendMediaGroup.builder().apply {
-						chatId("$telegramChatId")
-						medias(videos.map { (video, spoiler) ->
-							InputMediaVideo(video, video.name).apply { hasSpoiler = spoiler }
-						})
-					}.build())
-				} else if (videos.size == 1) {
-					ApiHolder.telegram.execute(SendVideo.builder().apply {
-						chatId(telegramChatId)
-						video(InputFile(videos[0].first))
-						hasSpoiler(videos[0].second)
-					}.build())
-				}
-
-				if (audios.size > 1) {
-					ApiHolder.telegram.execute(SendMediaGroup.builder().apply {
-						chatId("$telegramChatId")
-						medias(audios.map {
-							InputMediaAudio(it, it.name)
-						})
-					}.build())
-				} else if (audios.size == 1) {
-					ApiHolder.telegram.execute(SendAudio.builder().apply {
-						chatId(telegramChatId)
-						audio(InputFile(audios[0]))
-					}.build())
-				}
-
-				if (documents.size > 1) {
-					ApiHolder.telegram.execute(SendMediaGroup.builder().apply {
-						chatId("$telegramChatId")
-						medias(documents.map {
-							InputMediaDocument(it, it.name)
-						})
-					}.build())
-				} else if (documents.size == 1) {
-					ApiHolder.telegram.execute(SendDocument.builder().apply {
-						chatId(telegramChatId)
-						document(InputFile(documents[0]))
-					}.build())
-				}
-
-				for (gif in gifs) {
-					ApiHolder.telegram.execute(SendAnimation.builder().apply {
-						chatId(telegramChatId)
-						animation(InputFile(gif))
-					}.build())
-				}
-			} catch (ex: Exception) {
-				ex.printStackTrace()
-			} finally {
-				tempFiles.forEach { it.delete() }
-				tempDir.toFile().delete()
-			}
-		} catch (_: Exception) {
-		}
-	}
-
-	private fun transferToDiscord(update: Update, discordChannelId: Long) {
-		try {
-			val reply = update.message.replyToMessage
-			val replyId = (reply?.text ?: reply?.caption)?.takeIf {
-				it.contains("औ")
-			}?.substringAfter("औ")
-
-			val ownSide = reply != null && replyId == null
-			val hasSpoiler = update.message.hasMediaSpoiler ?: false
-
-			val message = buildString {
-				val content = update.message.text ?: update.message.caption ?: ""
-				val author = (update.message.from.userName ?: listOfNotNull(
-					update.message.from.firstName, update.message.from.lastName
-				).joinToString("_")).replace("\\s+".toRegex(), "_")
-				val answer = if (ownSide) {
-					val maxLength = 30
-					val originalText = reply.text ?: reply.caption ?: ""
-					val displayText = if (originalText.length > maxLength) {
-						originalText.take(maxLength) + "..."
-					} else {
-						originalText
-					}
-					if (displayText.isEmpty()) {
-						""
-					} else {
-						" ➦ «$displayText»"
-					}
-				} else ""
-				val id = "\n-# औ${update.message.messageId.toLong().encode()}"
-				val separator = if (content.contains("[\n\r]".toRegex())) "\n\n" else " "
-
-				append("__#")
-				append(author)
-				append("__")
-				append(answer)
-				append(":")
-				append(separator)
-				append(content)
-				append(id)
-			}
-
-			val channel = ApiHolder.discord.getTextChannelById(
+			val discordChannel = ApiHolder.discord.getTextChannelById(
 				discordChannelId
 			) ?: ApiHolder.discord.getThreadChannelById(
 				discordChannelId
 			) ?: return
 
-			fun sendTextMessages(text: String, replyToId: String? = null) {
-				val parts = text.split()
-				parts.forEachIndexed { index, part ->
-					channel.sendMessage(part).apply {
-						if (index == 0 && replyToId != null) {
-							setMessageReference(replyToId.decode())
-						}
-						queue()
-					}
-				}
-			}
+			val guildData = dataService.loadGuildData(discordChannel.guild)
 
-			fun sendFile(fileId: String, fileName: String, isImageAndResize: Boolean = false) {
-				val url = ApiHolder.telegram.execute(GetFile(fileId)).getFileUrl(config.telegramToken)
-				val byteArray = URL(url).readBytes()
-				val result = if (isImageAndResize) byteArray.resizeImage(160) else byteArray
-				val finalFileName = if (hasSpoiler) "SPOILER_$fileName" else fileName
-
-				sendTextMessages(message, replyId)
-				channel.sendFiles(FileUpload.fromData(result, finalFileName)).queue()
-			}
-
-			when {
-				update.message.photo != null -> {
-					val photo = update.message.photo.last()
-
-					if (photo.fileSize <= 9_999_999) {
-						sendFile(photo.fileId, "photo.jpg")
-					}
-				}
-
-				update.message.video != null -> {
-					val video = update.message.video
-
-					if (video.fileSize <= 9_999_999) {
-						sendFile(video.fileId, video.fileName ?: "video.mp4")
-					}
-				}
-
-				update.message.audio != null -> {
-					val audio = update.message.audio
-
-					if (audio.fileSize <= 9_999_999) {
-						sendFile(audio.fileId, audio.fileName ?: "audio.mp3")
-					}
-				}
-
-				update.message.document != null -> {
-					val file = update.message.document
-
-					if (file.fileSize <= 9_999_999) {
-						sendFile(file.fileId, file.fileName)
-					}
-				}
-
-				update.message.animation != null -> {
-					val animation = update.message.animation
-
-					if (animation.fileSize <= 9_999_999) {
-						sendFile(animation.fileId, animation.fileName ?: "animation.gif")
-					}
-				}
-
-				update.message.voice != null -> {
-					val voice = update.message.voice
-
-					if (voice.fileSize <= 9_999_999) {
-						sendFile(voice.fileId, "voice.ogg")
-					}
-				}
-
-				update.message.sticker != null -> {
-					val sticker = update.message.sticker
-
-					if (sticker.fileSize <= 9_999_999) {
-						sendFile(sticker.fileId, sticker.fileUniqueId + ".webp", true)
-					}
-				}
-
-				else -> {
-					sendTextMessages(message, replyId)
-				}
-			}
-		} catch (_: Exception) {
+			val messageWrapper = telegramService.receive(update)
+			telegramService.send(messageWrapper, discordChannelId, guildData)
 		}
-	}
-
-	private fun String.escapeMarkdown(): String {
-		val specialChars = listOf(
-			'_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'
-		)
-		val sb = StringBuilder()
-		for (char in this) {
-			if (char in specialChars) {
-				sb.append('\\')
-			}
-			sb.append(char)
-		}
-		return "$sb"
-	}
-
-	private fun ByteArray.resizeImage(width: Int): ByteArray {
-		val inputStream = ByteArrayInputStream(this)
-		val originalImage = ImageIO.read(inputStream)
-
-		val originalWidth = originalImage.width
-		val originalHeight = originalImage.height
-
-		val newHeight = (originalHeight.toDouble() / originalWidth.toDouble() * width).toInt()
-
-		val resizedImage = BufferedImage(width, newHeight, BufferedImage.TYPE_INT_ARGB)
-		val graphics2D = resizedImage.createGraphics()
-		graphics2D.drawImage(originalImage.getScaledInstance(width, newHeight, Image.SCALE_SMOOTH), 0, 0, null)
-		graphics2D.dispose()
-
-		val outputStream = ByteArrayOutputStream()
-		ImageIO.write(resizedImage, "webp", outputStream)
-		return outputStream.toByteArray()
 	}
 }
