@@ -6,15 +6,14 @@ import io.github.hummel009.discord.vadim.bus.bean.FileWrapper
 import io.github.hummel009.discord.vadim.bus.bean.MessageWrapper
 import io.github.hummel009.discord.vadim.bus.service.TelegramService
 import io.github.hummel009.discord.vadim.bus.utils.FileType
-import io.github.hummel009.discord.vadim.bus.utils.split
 import io.github.hummel009.discord.vadim.dao.FileDao
 import io.github.hummel009.discord.vadim.factory.DaoFactory
 import io.github.hummel009.discord.vadim.utils.I18n
 import io.github.hummel009.discord.vadim.utils.config
-import io.github.hummel009.discord.vadim.utils.error
-import net.dv8tion.jda.api.EmbedBuilder
+import io.github.hummel009.discord.vadim.utils.getMessageChannelById
 import net.dv8tion.jda.api.utils.FileUpload
 import org.telegram.telegrambots.meta.api.methods.GetFile
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
 import java.net.URL
 
@@ -127,17 +126,11 @@ class TelegramServiceImpl : TelegramService {
 		)
 	}
 
-	override fun send(m: MessageWrapper, discordChannelId: Long, guildData: GuildData) {
-		val discordChannel = ApiHolder.discord.getTextChannelById(
-			discordChannelId
-		) ?: ApiHolder.discord.getThreadChannelById(
-			discordChannelId
-		) ?: return
-
-		val msg = m.textMessage
+	override fun send(m: MessageWrapper, selfId: Long, otherId: Long, guildData: GuildData) {
+		val discordChannel = ApiHolder.discord.getMessageChannelById(selfId) ?: return
 
 		if (!m.isCaption()) {
-			val parts = msg.split()
+			val parts = m.textMessage.split()
 			parts.forEachIndexed { index, part ->
 				discordChannel.sendMessage(part).apply {
 					if (index == 0 && m.replyToIdIfOtherSide != null) {
@@ -155,21 +148,18 @@ class TelegramServiceImpl : TelegramService {
 					val file = fileDao.getFile(filePath)
 
 					val fileName = if (fw.isSpoiler == true) "SPOILER_${file.name}" else file.name
-					val action = discordChannel.sendFiles(FileUpload.fromData(file, fileName))
-
-					if (m.isCaption()) {
-						action.setContent(msg)
-					}
-
-					action.queue {
+					discordChannel.sendFiles(FileUpload.fromData(file, fileName)).setContent(m.textCaption).queue {
 						fw.freeWithPath(filePath)
 					}
 				}
 
 				FileType.NULL -> {
-					discordChannel.sendMessageEmbeds(
-						EmbedBuilder().error(null, I18n.of("file_limit", guildData))
-					).queue()
+					ApiHolder.telegram.execute(SendMessage.builder().apply {
+						chatId(selfId)
+						text(I18n.of("file_limit", guildData).s())
+					}.build())
+
+					discordChannel.sendMessage(m.textCaption + "\n\n" + I18n.of("file_limit", guildData)).queue()
 				}
 			}
 		}
@@ -179,5 +169,53 @@ class TelegramServiceImpl : TelegramService {
 		val i = lastIndexOf('.')
 
 		return if (i != -1 && i < length - 1) substring(i + 1) else null
+	}
+
+	private fun String.split(): List<String> {
+		if (length <= 1999) {
+			return listOf(this)
+		}
+
+		val parts = mutableListOf<String>()
+		var remaining = this
+
+		while (remaining.length > 1999) {
+			val splitIndex = findSplitIndex(remaining, 1999)
+			parts.add(remaining.take(splitIndex))
+			remaining = remaining.substring(splitIndex).trimStart()
+		}
+
+		if (remaining.isNotEmpty()) {
+			parts.add(remaining)
+		}
+
+		return parts
+	}
+
+	private fun findSplitIndex(text: String, maxLength: Int): Int {
+		val textToCheck = text.take(maxLength)
+
+		val lastParagraph = textToCheck.lastIndexOf("\n\n")
+		if (lastParagraph > 0 && lastParagraph < maxLength - 10) {
+			return lastParagraph + 2
+		}
+
+		val lastDotSpace = textToCheck.lastIndexOf(". ")
+		if (lastDotSpace > 0 && lastDotSpace < maxLength - 5) {
+			return lastDotSpace + 2
+		}
+
+		val punctuationPattern = "[!?;:] ".toRegex()
+		val match = punctuationPattern.findAll(textToCheck).lastOrNull { it.range.last < maxLength - 5 }
+		if (match != null) {
+			return match.range.last + 1
+		}
+
+		val lastSpace = textToCheck.lastIndexOf(' ')
+		if (lastSpace > 0 && lastSpace < maxLength - 5) {
+			return lastSpace + 1
+		}
+
+		return maxLength
 	}
 }

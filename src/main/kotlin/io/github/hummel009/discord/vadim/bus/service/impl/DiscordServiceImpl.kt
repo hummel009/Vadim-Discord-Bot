@@ -9,6 +9,7 @@ import io.github.hummel009.discord.vadim.bus.utils.FileType
 import io.github.hummel009.discord.vadim.dao.FileDao
 import io.github.hummel009.discord.vadim.factory.DaoFactory
 import io.github.hummel009.discord.vadim.utils.I18n
+import io.github.hummel009.discord.vadim.utils.getMessageChannelById
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.utils.FileProxy
 import org.telegram.telegrambots.meta.api.methods.ParseMode
@@ -118,13 +119,13 @@ class DiscordServiceImpl : DiscordService {
 		)
 	}
 
-	override fun send(m: MessageWrapper, telegramChatId: Long, guildData: GuildData) {
-		val msg = m.textMessage
+	override fun send(m: MessageWrapper, selfId: Long, otherId: Long, guildData: GuildData) {
+		val discordChannel = ApiHolder.discord.getMessageChannelById(selfId) ?: return
 
 		if (!m.isCaption()) {
 			ApiHolder.telegram.execute(SendMessage.builder().apply {
-				chatId(telegramChatId)
-				text(msg)
+				chatId(otherId)
+				text(m.textMessage)
 				parseMode(ParseMode.MARKDOWNV2)
 				if (m.replyToIdIfOtherSide != null) {
 					replyToMessageId(m.replyToIdIfOtherSide.toInt())
@@ -139,13 +140,11 @@ class DiscordServiceImpl : DiscordService {
 					val file = fileDao.getFile(filePath)
 
 					ApiHolder.telegram.execute(SendPhoto.builder().apply {
-						chatId(telegramChatId)
+						chatId(otherId)
 						photo(InputFile(file))
 						hasSpoiler(fw.isSpoiler)
-						if (m.isCaption()) {
-							parseMode(ParseMode.MARKDOWNV2)
-							caption(msg)
-						}
+						parseMode(ParseMode.MARKDOWNV2)
+						caption(m.textCaption)
 					}.build())
 
 					fw.freeWithPath(filePath)
@@ -156,13 +155,11 @@ class DiscordServiceImpl : DiscordService {
 					val file = fileDao.getFile(filePath)
 
 					ApiHolder.telegram.execute(SendVideo.builder().apply {
-						chatId(telegramChatId)
+						chatId(otherId)
 						video(InputFile(file))
 						hasSpoiler(fw.isSpoiler)
-						if (m.isCaption()) {
-							parseMode(ParseMode.MARKDOWNV2)
-							caption(msg)
-						}
+						parseMode(ParseMode.MARKDOWNV2)
+						caption(m.textCaption)
 					}.build())
 
 					fw.freeWithPath(filePath)
@@ -173,12 +170,10 @@ class DiscordServiceImpl : DiscordService {
 					val file = fileDao.getFile(filePath)
 
 					ApiHolder.telegram.execute(SendAudio.builder().apply {
-						chatId(telegramChatId)
+						chatId(otherId)
 						audio(InputFile(file))
-						if (m.isCaption()) {
-							parseMode(ParseMode.MARKDOWNV2)
-							caption(msg)
-						}
+						parseMode(ParseMode.MARKDOWNV2)
+						caption(m.textCaption)
 					}.build())
 
 					fw.freeWithPath(filePath)
@@ -189,12 +184,10 @@ class DiscordServiceImpl : DiscordService {
 					val file = fileDao.getFile(filePath)
 
 					ApiHolder.telegram.execute(SendVoice.builder().apply {
-						chatId(telegramChatId)
+						chatId(otherId)
 						voice(InputFile(file))
-						if (m.isCaption()) {
-							parseMode(ParseMode.MARKDOWNV2)
-							caption(msg)
-						}
+						parseMode(ParseMode.MARKDOWNV2)
+						caption(m.textCaption)
 					}.build())
 
 					fw.freeWithPath(filePath)
@@ -205,13 +198,11 @@ class DiscordServiceImpl : DiscordService {
 					val file = fileDao.getFile(filePath)
 
 					ApiHolder.telegram.execute(SendAnimation.builder().apply {
-						chatId(telegramChatId)
+						chatId(otherId)
 						animation(InputFile(file))
 						hasSpoiler(fw.isSpoiler)
-						if (m.isCaption()) {
-							parseMode(ParseMode.MARKDOWNV2)
-							caption(msg)
-						}
+						parseMode(ParseMode.MARKDOWNV2)
+						caption(m.textCaption)
 					}.build())
 
 					fw.freeWithPath(filePath)
@@ -222,21 +213,21 @@ class DiscordServiceImpl : DiscordService {
 					val file = fileDao.getFile(filePath)
 
 					ApiHolder.telegram.execute(SendDocument.builder().apply {
-						chatId(telegramChatId)
+						chatId(otherId)
 						document(InputFile(file))
-						if (m.isCaption()) {
-							parseMode(ParseMode.MARKDOWNV2)
-							caption(msg)
-						}
+						parseMode(ParseMode.MARKDOWNV2)
+						caption(m.textCaption)
 					}.build())
 
 					fw.freeWithPath(filePath)
 				}
 
 				FileType.NULL -> {
+					discordChannel.sendMessage(I18n.of("file_limit", guildData).s()).queue()
+
 					ApiHolder.telegram.execute(SendMessage.builder().apply {
-						chatId(telegramChatId)
-						text("`${I18n.of("file_limit", guildData).s()}`")
+						chatId(otherId)
+						text(m.textCaption + "\n\n" + I18n.of("file_limit", guildData))
 					}.build())
 				}
 			}

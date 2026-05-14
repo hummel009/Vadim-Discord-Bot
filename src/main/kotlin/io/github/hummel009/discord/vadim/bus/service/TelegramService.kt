@@ -6,5 +6,5 @@ import org.telegram.telegrambots.meta.api.objects.Update
 
 interface TelegramService {
 	fun receive(update: Update): MessageWrapper
-	fun send(m: MessageWrapper, discordChannelId: Long, guildData: GuildData)
+	fun send(m: MessageWrapper, selfId: Long, otherId: Long, guildData: GuildData)
 }

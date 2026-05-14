@@ -5,6 +5,7 @@ import io.github.hummel009.discord.vadim.bus.service.DiscordService
 import io.github.hummel009.discord.vadim.bus.service.TelegramService
 import io.github.hummel009.discord.vadim.factory.ServiceFactory
 import io.github.hummel009.discord.vadim.service.DataService
+import io.github.hummel009.discord.vadim.utils.getMessageChannelById
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.EventListener
@@ -33,7 +34,7 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 			val guildData = dataService.loadGuildData(event.guild)
 
 			val messageWrapper = discordService.receive(event)
-			discordService.send(messageWrapper, telegramChatId, guildData)
+			discordService.send(messageWrapper, discordChannelId, telegramChatId, guildData)
 		}
 	}
 
@@ -50,16 +51,12 @@ object BusHandler : EventListener, LongPollingSingleThreadUpdateConsumer {
 				it.telegramChatId == telegramChatId
 			}?.discordChannelId ?: return
 
-			val discordChannel = ApiHolder.discord.getTextChannelById(
-				discordChannelId
-			) ?: ApiHolder.discord.getThreadChannelById(
-				discordChannelId
-			) ?: return
+			val discordChannel = ApiHolder.discord.getMessageChannelById(discordChannelId) ?: return
 
 			val guildData = dataService.loadGuildData(discordChannel.guild)
 
 			val messageWrapper = telegramService.receive(update)
-			telegramService.send(messageWrapper, discordChannelId, guildData)
+			telegramService.send(messageWrapper, telegramChatId, discordChannelId, guildData)
 		}
 	}
 }

@@ -6,5 +6,5 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 interface DiscordService {
 	fun receive(event: MessageReceivedEvent): MessageWrapper
-	fun send(m: MessageWrapper, telegramChatId: Long, guildData: GuildData)
+	fun send(m: MessageWrapper, selfId: Long, otherId: Long, guildData: GuildData)
 }

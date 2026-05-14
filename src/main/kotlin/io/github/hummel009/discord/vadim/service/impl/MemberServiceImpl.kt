@@ -4,6 +4,7 @@ import io.github.hummel009.discord.vadim.factory.ServiceFactory
 import io.github.hummel009.discord.vadim.service.DataService
 import io.github.hummel009.discord.vadim.service.MemberService
 import io.github.hummel009.discord.vadim.utils.I18n
+import io.github.hummel009.discord.vadim.utils.getMessageChannelById
 import io.github.hummel009.discord.vadim.utils.success
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -25,11 +26,7 @@ class MemberServiceImpl : MemberService {
 			}
 
 			guildData.localBus.removeIf {
-				(guild.getTextChannelById(
-					it.discordChannelId
-				) ?: guild.getThreadChannelById(
-					it.discordChannelId
-				)) == null
+				guild.getMessageChannelById(it.discordChannelId) == null
 			}
 
 			val text = buildString {

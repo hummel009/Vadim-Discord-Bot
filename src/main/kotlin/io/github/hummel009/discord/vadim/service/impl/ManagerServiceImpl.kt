@@ -152,11 +152,7 @@ class ManagerServiceImpl : ManagerService {
 						val discordChannelId = arguments[0].toLong()
 						val telegramChatId = arguments[1].toLong()
 
-						guild.getTextChannelById(
-							discordChannelId
-						) ?: guild.getThreadChannelById(
-							discordChannelId
-						) ?: throw Exception()
+						guild.getMessageChannelById(discordChannelId) ?: throw Exception()
 
 						val noClash = guildData.localBus.none {
 							it.discordChannelId == discordChannelId
