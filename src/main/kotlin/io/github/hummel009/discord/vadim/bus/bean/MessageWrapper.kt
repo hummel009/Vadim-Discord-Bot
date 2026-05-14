@@ -33,9 +33,13 @@ data class MessageWrapper(
 		it.contains(signatureStart)
 	}?.substringAfter(signatureStart)?.decode()
 
-	private val signature: String = "$signatureStart${signatureRaw.toLong().encode()}"
+	private val signature: String = run {
+		"$signatureStart${signatureRaw.toLong().encode()}"
+	}
 
-	private val separator: String = if ("\n" in textRaw || textRaw.length > 128) "\n\n" else " "
+	private val separator: String = run {
+		if ("\n" in textRaw || replyToQuoteIfSelfSide !== null && textRaw.length > 128) "\n\n" else " "
+	}
 
 	val textMessage: String = "`#${author}`${replyToQuoteIfSelfSide ?: ":"}${separator}${text}\n\n||${signature}||"
 
