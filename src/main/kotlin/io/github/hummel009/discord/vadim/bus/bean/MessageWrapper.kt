@@ -23,10 +23,10 @@ data class MessageWrapper(
 	val replyToQuoteIfSelfSide: String? = replyToRaw?.takeIf {
 		!it.contains(signatureStart)
 	}?.let { text ->
-		val quote = text.replace("\n", " ").take(30).escapeMarkdown().let {
+		val quote = text.replace("\n", " ").take(30).let {
 			if (text.length > 30) "$it..." else it
 		}
-		" ➦ «$quote»:"
+		" ➦ `«$quote»`:"
 	}
 
 	val replyToIdIfOtherSide: Long? = replyToRaw?.takeIf {
@@ -37,9 +37,9 @@ data class MessageWrapper(
 
 	private val separator: String = if ("\n" in textRaw) "\n\n" else " "
 
-	val textMessage: String = "`#${author}${replyToQuoteIfSelfSide ?: ":"}`${separator}${text}\n\n`${signature}`"
+	val textMessage: String = "`#${author}`${replyToQuoteIfSelfSide ?: ":"}${separator}${text}\n\n||${signature}||"
 
-	val textCaption: String = "`#${author}:` `${signature}`"
+	val textCaption: String = "`#${author}` ||${signature}||"
 
 	val fileWrappers: List<FileWrapper> = run {
 		val fileWrappersSorted = fileWrappersRaw.filterNotNull().sortedBy {
