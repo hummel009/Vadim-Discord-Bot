@@ -23,8 +23,8 @@ data class MessageWrapper(
 	val replyToQuoteIfSelfSide: String? = replyToRaw?.takeIf {
 		!it.contains(signatureStart)
 	}?.let { text ->
-		val quote = text.replace("\n", " ").take(30).let {
-			if (text.length > 30) "$it..." else it
+		val quote = text.replace("\n", " ").take(32).let {
+			if (text.length > 32) "$it..." else it
 		}
 		" ➦ `«$quote»`:"
 	}
@@ -35,7 +35,7 @@ data class MessageWrapper(
 
 	private val signature: String = "$signatureStart${signatureRaw.toLong().encode()}"
 
-	private val separator: String = if ("\n" in textRaw) "\n\n" else " "
+	private val separator: String = if ("\n" in textRaw || textRaw.length > 128) "\n\n" else " "
 
 	val textMessage: String = "`#${author}`${replyToQuoteIfSelfSide ?: ":"}${separator}${text}\n\n||${signature}||"
 

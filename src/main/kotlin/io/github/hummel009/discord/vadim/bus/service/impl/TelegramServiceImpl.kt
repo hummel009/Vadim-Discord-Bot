@@ -127,7 +127,7 @@ class TelegramServiceImpl : TelegramService {
 	}
 
 	override fun send(m: MessageWrapper, selfId: Long, otherId: Long, guildData: GuildData) {
-		val discordChannel = ApiHolder.discord.getMessageChannelById(selfId) ?: return
+		val discordChannel = ApiHolder.discord.getMessageChannelById(otherId) ?: return
 
 		if (!m.isCaption()) {
 			val parts = m.textMessage.split()
