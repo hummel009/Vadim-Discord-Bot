@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.utils.FileUpload
 import org.telegram.telegrambots.meta.api.methods.GetFile
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
-import java.net.URL
+import java.net.URI
 
 class TelegramServiceImpl : TelegramService {
 	private val fileDao: FileDao = DaoFactory.fileDao
@@ -28,11 +28,11 @@ class TelegramServiceImpl : TelegramService {
 				val photo = update.message.photo.last()
 
 				if (photo.fileSize <= 9_999_999) {
-					val fileBytes = URL(
+					val fileBytes = URI(
 						ApiHolder.telegram.execute(
 							GetFile(photo.fileId)
 						).getFileUrl(config.telegramToken)
-					).readBytes()
+					).toURL().readBytes()
 
 					fileWrappers.add(
 						FileWrapper(fileBytes, "jpg", FileType.PHOTO, update.message.hasMediaSpoiler)
@@ -46,11 +46,11 @@ class TelegramServiceImpl : TelegramService {
 				val video = update.message.video
 
 				if (video.fileSize <= 9_999_999) {
-					val fileBytes = URL(
+					val fileBytes = URI(
 						ApiHolder.telegram.execute(
 							GetFile(video.fileId)
 						).getFileUrl(config.telegramToken)
-					).readBytes()
+					).toURL().readBytes()
 
 					fileWrappers.add(
 						FileWrapper(fileBytes, "mp4", FileType.VIDEO, update.message.hasMediaSpoiler)
@@ -64,11 +64,11 @@ class TelegramServiceImpl : TelegramService {
 				val audio = update.message.audio
 
 				if (audio.fileSize <= 9_999_999) {
-					val fileBytes = URL(
+					val fileBytes = URI(
 						ApiHolder.telegram.execute(
 							GetFile(audio.fileId)
 						).getFileUrl(config.telegramToken)
-					).readBytes()
+					).toURL().readBytes()
 
 					fileWrappers.add(
 						FileWrapper(fileBytes, "mp3", FileType.AUDIO, update.message.hasMediaSpoiler)
@@ -82,11 +82,11 @@ class TelegramServiceImpl : TelegramService {
 				val voice = update.message.voice
 
 				if (voice.fileSize <= 9_999_999) {
-					val fileBytes = URL(
+					val fileBytes = URI(
 						ApiHolder.telegram.execute(
 							GetFile(voice.fileId)
 						).getFileUrl(config.telegramToken)
-					).readBytes()
+					).toURL().readBytes()
 
 					fileWrappers.add(
 						FileWrapper(fileBytes, "ogg", FileType.VOICE, update.message.hasMediaSpoiler)
@@ -100,11 +100,11 @@ class TelegramServiceImpl : TelegramService {
 				val doc = update.message.document
 
 				if (doc.fileSize <= 9_999_999) {
-					val fileBytes = URL(
+					val fileBytes = URI(
 						ApiHolder.telegram.execute(
 							GetFile(doc.fileId)
 						).getFileUrl(config.telegramToken)
-					).readBytes()
+					).toURL().readBytes()
 
 					fileWrappers.add(
 						FileWrapper(fileBytes, doc.fileName.ext(), FileType.DOC, update.message.hasMediaSpoiler)

@@ -11,10 +11,10 @@ import io.github.hummel009.discord.vadim.factory.DaoFactory
 import io.github.hummel009.discord.vadim.utils.I18n
 import io.github.hummel009.discord.vadim.utils.getMessageChannelById
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
-import net.dv8tion.jda.api.utils.FileProxy
 import org.telegram.telegrambots.meta.api.methods.ParseMode
 import org.telegram.telegrambots.meta.api.methods.send.*
 import org.telegram.telegrambots.meta.api.objects.InputFile
+import java.net.URI
 
 class DiscordServiceImpl : DiscordService {
 	private val fileDao: FileDao = DaoFactory.fileDao
@@ -30,7 +30,7 @@ class DiscordServiceImpl : DiscordService {
 					fileExtension?.lowercase() == it
 				} -> {
 					if (attachment.size <= 9_999_999) {
-						val fileBytes = FileProxy(attachment.proxyUrl).download().join().readBytes()
+						val fileBytes = URI(attachment.proxyUrl).toURL().readBytes()
 
 						fileWrappers.add(
 							FileWrapper(fileBytes, "jpg", FileType.PHOTO, attachment.isSpoiler)
@@ -44,7 +44,7 @@ class DiscordServiceImpl : DiscordService {
 					fileExtension?.lowercase() == it
 				} -> {
 					if (attachment.size <= 9_999_999) {
-						val fileBytes = FileProxy(attachment.proxyUrl).download().join().readBytes()
+						val fileBytes = URI(attachment.proxyUrl).toURL().readBytes()
 
 						fileWrappers.add(
 							FileWrapper(fileBytes, "mp4", FileType.VIDEO, attachment.isSpoiler)
@@ -58,7 +58,7 @@ class DiscordServiceImpl : DiscordService {
 					fileExtension?.lowercase() == it
 				} -> {
 					if (attachment.size <= 9_999_999) {
-						val fileBytes = FileProxy(attachment.proxyUrl).download().join().readBytes()
+						val fileBytes = URI(attachment.proxyUrl).toURL().readBytes()
 
 						fileWrappers.add(
 							FileWrapper(fileBytes, "mp3", FileType.AUDIO, attachment.isSpoiler)
@@ -72,7 +72,7 @@ class DiscordServiceImpl : DiscordService {
 					fileExtension?.lowercase() == it
 				} -> {
 					if (attachment.size <= 9_999_999) {
-						val fileBytes = FileProxy(attachment.proxyUrl).download().join().readBytes()
+						val fileBytes = URI(attachment.proxyUrl).toURL().readBytes()
 
 						fileWrappers.add(
 							FileWrapper(fileBytes, "ogg", FileType.VOICE, attachment.isSpoiler)
@@ -86,7 +86,7 @@ class DiscordServiceImpl : DiscordService {
 					fileExtension?.lowercase() == it
 				} -> {
 					if (attachment.size <= 9_999_999) {
-						val fileBytes = FileProxy(attachment.proxyUrl).download().join().readBytes()
+						val fileBytes = URI(attachment.proxyUrl).toURL().readBytes()
 
 						fileWrappers.add(
 							FileWrapper(fileBytes, "gif", FileType.GIF, attachment.isSpoiler)
@@ -98,7 +98,7 @@ class DiscordServiceImpl : DiscordService {
 
 				else -> {
 					if (attachment.size <= 9_999_999) {
-						val fileBytes = FileProxy(attachment.proxyUrl).download().join().readBytes()
+						val fileBytes = URI(attachment.proxyUrl).toURL().readBytes()
 
 						fileWrappers.add(
 							FileWrapper(fileBytes, fileExtension, FileType.DOC, attachment.isSpoiler)
