@@ -7,6 +7,7 @@ import io.github.hummel009.discord.vadim.service.DataService
 import io.github.hummel009.discord.vadim.service.ManagerService
 import io.github.hummel009.discord.vadim.utils.*
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
 class ManagerServiceImpl : ManagerService {
@@ -22,29 +23,30 @@ class ManagerServiceImpl : ManagerService {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
-			val embed = if (!accessService.fromManagerAtLeast(event, guildData)) {
-				EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-			} else {
-				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
-
-				if (arguments.size == 1) {
-					try {
-						val lang = Lang.of(arguments[0]) ?: throw Exception()
-
-						guildData.lang = lang
-
-						val langName = I18n.of(lang.code, guildData)
-
-						EmbedBuilder().success(
-							event.member, I18n.of("set_language", guildData, langName)
-						)
-					} catch (_: Exception) {
-						EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
-					}
-				} else {
-					EmbedBuilder().error(event.member, I18n.of("msg_error_arg", guildData))
+			val embed = run(fun(): MessageEmbed {
+				if (!accessService.fromManagerAtLeast(event, guildData)) {
+					return EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
 				}
-			}
+
+				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
+				if (arguments.size != 1) {
+					return EmbedBuilder().error(event.member, I18n.of("msg_error_arg", guildData))
+				}
+
+				try {
+					val lang = Lang.of(arguments[0]) ?: throw Exception()
+					guildData.lang = lang
+
+					val langName = I18n.of(lang.code, guildData)
+
+					return EmbedBuilder().success(
+						event.member, I18n.of("set_language", guildData, langName)
+					)
+				} catch (_: Exception) {
+					return EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
+				}
+			})
+
 			dataService.saveGuildData(guild, guildData)
 
 			event.hook.sendMessageEmbeds(embed).queue()
@@ -60,29 +62,31 @@ class ManagerServiceImpl : ManagerService {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
-			val embed = if (!accessService.fromManagerAtLeast(event, guildData)) {
-				EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-			} else {
-				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
-
-				if (arguments.size == 1) {
-					try {
-						val roleId = arguments[0].toLong()
-
-						guild.getRoleById(roleId) ?: throw Exception()
-
-						guildData.managerRoleIds.add(roleId)
-
-						EmbedBuilder().success(
-							event.member, I18n.of("add_manager_role", guildData, roleId)
-						)
-					} catch (_: Exception) {
-						EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
-					}
-				} else {
-					EmbedBuilder().error(event.member, I18n.of("msg_error_arg", guildData))
+			val embed = run(fun(): MessageEmbed {
+				if (!accessService.fromManagerAtLeast(event, guildData)) {
+					return EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
 				}
-			}
+
+				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
+				if (arguments.size != 1) {
+					return EmbedBuilder().error(event.member, I18n.of("msg_error_arg", guildData))
+				}
+
+				try {
+					val roleId = arguments[0].toLong().also {
+						require(guild.getRoleById(it) != null)
+					}
+
+					guildData.managerRoleIds.add(roleId)
+
+					return EmbedBuilder().success(
+						event.member, I18n.of("add_manager_role", guildData, roleId)
+					)
+				} catch (_: Exception) {
+					return EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
+				}
+			})
+
 			dataService.saveGuildData(guild, guildData)
 
 			event.hook.sendMessageEmbeds(embed).queue()
@@ -98,35 +102,37 @@ class ManagerServiceImpl : ManagerService {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
-			val embed = if (!accessService.fromManagerAtLeast(event, guildData)) {
-				EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-			} else {
-				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
+			val embed = run(fun(): MessageEmbed {
+				if (!accessService.fromManagerAtLeast(event, guildData)) {
+					return EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
+				}
 
+				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
 				if (arguments.isEmpty()) {
 					guildData.managerRoleIds.clear()
 
-					EmbedBuilder().success(event.member, I18n.of("clear_manager_roles", guildData))
-				} else {
-					if (arguments.size == 1) {
-						try {
-							val roleId = arguments[0].toLong()
-
-							if (!guildData.managerRoleIds.removeIf { it == roleId }) {
-								throw Exception()
-							}
-
-							EmbedBuilder().success(
-								event.member, I18n.of("clear_manager_roles_single", guildData, roleId)
-							)
-						} catch (_: Exception) {
-							EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
-						}
-					} else {
-						EmbedBuilder().error(event.member, I18n.of("msg_error_arg", guildData))
-					}
+					return EmbedBuilder().success(event.member, I18n.of("clear_manager_roles", guildData))
 				}
-			}
+
+				if (arguments.size != 1) {
+					return EmbedBuilder().error(event.member, I18n.of("msg_error_arg", guildData))
+				}
+
+				try {
+					val roleId = arguments[0].toLong().also {
+						require(guild.getRoleById(it) != null)
+					}
+
+					require(guildData.managerRoleIds.removeIf { it == roleId })
+
+					return EmbedBuilder().success(
+						event.member, I18n.of("clear_manager_roles_single", guildData, roleId)
+					)
+				} catch (_: Exception) {
+					return EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
+				}
+			})
+
 			dataService.saveGuildData(guild, guildData)
 
 			event.hook.sendMessageEmbeds(embed).queue()
@@ -142,41 +148,38 @@ class ManagerServiceImpl : ManagerService {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
-			val embed = if (!accessService.fromManagerAtLeast(event, guildData)) {
-				EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-			} else {
-				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
-
-				if (arguments.size == 2) {
-					try {
-						val discordChannelId = arguments[0].toLong()
-						val telegramChatId = arguments[1].toLong()
-
-						guild.getMessageChannelById(discordChannelId) ?: throw Exception()
-
-						val noClash = guildData.localBus.none {
-							it.discordChannelId == discordChannelId
-						} && guildData.localBus.none {
-							it.telegramChatId == telegramChatId
-						}
-
-						if (noClash) {
-							guildData.localBus.add(Connection(guild.idLong, discordChannelId, telegramChatId))
-						} else {
-							throw Exception()
-						}
-
-						EmbedBuilder().success(
-							event.member,
-							I18n.of("add_connection", guildData, discordChannelId, telegramChatId)
-						)
-					} catch (_: Exception) {
-						EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
-					}
-				} else {
-					EmbedBuilder().error(event.member, I18n.of("msg_error_arg", guildData))
+			val embed = run(fun(): MessageEmbed {
+				if (!accessService.fromManagerAtLeast(event, guildData)) {
+					return EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
 				}
-			}
+
+				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
+				if (arguments.size != 2) {
+					return EmbedBuilder().error(event.member, I18n.of("msg_error_arg", guildData))
+				}
+
+				try {
+					val discordChannelId = arguments[0].toLong().also {
+						require(guild.getMessageChannelById(it) != null)
+					}
+					val telegramChatId = arguments[1].toLong()
+
+					require(guildData.localBus.none {
+						it.discordChannelId == discordChannelId
+					} && guildData.localBus.none {
+						it.telegramChatId == telegramChatId
+					})
+
+					guildData.localBus.add(Connection(guild.idLong, discordChannelId, telegramChatId))
+
+					return EmbedBuilder().success(
+						event.member, I18n.of("add_connection", guildData, discordChannelId, telegramChatId)
+					)
+				} catch (_: Exception) {
+					return EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
+				}
+			})
+
 			dataService.saveGuildData(guild, guildData)
 
 			event.hook.sendMessageEmbeds(embed).queue()
@@ -192,37 +195,39 @@ class ManagerServiceImpl : ManagerService {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
-			val embed = if (!accessService.fromManagerAtLeast(event, guildData)) {
-				EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-			} else {
-				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
+			val embed = run(fun(): MessageEmbed {
+				if (!accessService.fromManagerAtLeast(event, guildData)) {
+					return EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
+				}
 
+				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
 				if (arguments.isEmpty()) {
 					guildData.localBus.clear()
 
-					EmbedBuilder().success(event.member, I18n.of("clear_connections", guildData))
-				} else {
-					if (arguments.size == 2) {
-						try {
-							val discordChannelId = arguments[0].toLong()
-							val telegramChatId = arguments[1].toLong()
-
-							if (!guildData.localBus.removeIf { it.discordChannelId == discordChannelId && it.telegramChatId == telegramChatId }) {
-								throw Exception()
-							}
-
-							EmbedBuilder().success(
-								event.member,
-								I18n.of("clear_connections_single", guildData, discordChannelId, telegramChatId)
-							)
-						} catch (_: Exception) {
-							EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
-						}
-					} else {
-						EmbedBuilder().error(event.member, I18n.of("msg_error_arg", guildData))
-					}
+					return EmbedBuilder().success(event.member, I18n.of("clear_connections", guildData))
 				}
-			}
+				if (arguments.size != 2) {
+					return EmbedBuilder().error(event.member, I18n.of("msg_error_arg", guildData))
+				}
+
+				try {
+					val discordChannelId = arguments[0].toLong().also {
+						require(guild.getMessageChannelById(it) != null)
+					}
+					val telegramChatId = arguments[1].toLong()
+
+					require(guildData.localBus.removeIf {
+						it.discordChannelId == discordChannelId && it.telegramChatId == telegramChatId
+					})
+
+					return EmbedBuilder().success(
+						event.member, I18n.of("clear_connections_single", guildData, discordChannelId, telegramChatId)
+					)
+				} catch (_: Exception) {
+					return EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
+				}
+			})
+
 			dataService.saveGuildData(guild, guildData)
 
 			event.hook.sendMessageEmbeds(embed).queue()
@@ -237,38 +242,31 @@ class ManagerServiceImpl : ManagerService {
 		event.deferReply().queue {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
-			val busRegistry = dataService.loadGlobalData()
+			val globalData = dataService.loadGlobalData()
 
-			val embed = if (!accessService.fromManagerAtLeast(event, guildData)) {
-				EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-			} else {
-				try {
-					if (guildData.localBus.isEmpty()) {
-						throw Exception()
-					}
-
-					val noClash = busRegistry.globalBus.none { gc ->
-						guildData.localBus.any { lc ->
-							gc.discordChannelId == lc.discordChannelId
-						} || guildData.localBus.any { lc ->
-							gc.telegramChatId == lc.telegramChatId
-						}
-					}
-
-					if (noClash) {
-						busRegistry.globalBus.addAll(guildData.localBus)
-					} else {
-						throw Exception()
-					}
-
-					EmbedBuilder().success(
-						event.member, I18n.of("commit", guildData)
-					)
-				} catch (_: Exception) {
-					EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
+			val embed = run(fun(): MessageEmbed {
+				if (!accessService.fromManagerAtLeast(event, guildData)) {
+					return EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
 				}
-			}
-			dataService.saveGlobalData(busRegistry)
+
+				try {
+					require(guildData.localBus.isNotEmpty())
+
+					require(globalData.globalBus.none { gb ->
+						val discordClash = guildData.localBus.any { it.discordChannelId == gb.discordChannelId }
+						val telegramClash = guildData.localBus.any { it.telegramChatId == gb.telegramChatId }
+						discordClash || telegramClash
+					})
+
+					globalData.globalBus.addAll(guildData.localBus)
+
+					return EmbedBuilder().success(event.member, I18n.of("commit", guildData))
+				} catch (_: Exception) {
+					return EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
+				}
+			})
+
+			dataService.saveGlobalData(globalData)
 
 			event.hook.sendMessageEmbeds(embed).queue()
 		}
@@ -282,24 +280,25 @@ class ManagerServiceImpl : ManagerService {
 		event.deferReply().queue {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
-			val busRegistry = dataService.loadGlobalData()
+			val globalData = dataService.loadGlobalData()
 
-			val embed = if (!accessService.fromManagerAtLeast(event, guildData)) {
-				EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-			} else {
-				try {
-					busRegistry.globalBus.removeIf {
-						it.guildId == guild.idLong
-					}
-
-					EmbedBuilder().success(
-						event.member, I18n.of("uncommit", guildData)
-					)
-				} catch (_: Exception) {
-					EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
+			val embed = run(fun(): MessageEmbed {
+				if (!accessService.fromManagerAtLeast(event, guildData)) {
+					return EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
 				}
-			}
-			dataService.saveGlobalData(busRegistry)
+
+				try {
+					require(globalData.globalBus.removeIf {
+						it.guildId == guild.idLong
+					})
+
+					return EmbedBuilder().success(event.member, I18n.of("uncommit", guildData))
+				} catch (_: Exception) {
+					return EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
+				}
+			})
+
+			dataService.saveGlobalData(globalData)
 
 			event.hook.sendMessageEmbeds(embed).queue()
 		}
@@ -314,13 +313,16 @@ class ManagerServiceImpl : ManagerService {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
-			val embed = if (!accessService.fromManagerAtLeast(event, guildData)) {
-				EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-			} else {
+			val embed = run(fun(): MessageEmbed {
+				if (!accessService.fromManagerAtLeast(event, guildData)) {
+					return EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
+				}
+
 				dataService.wipeGuildData(guild)
 
-				EmbedBuilder().success(event.member, I18n.of("wipe_data", guildData))
-			}
+				return EmbedBuilder().success(event.member, I18n.of("wipe_data", guildData))
+			})
+
 			event.hook.sendMessageEmbeds(embed).queue()
 		}
 	}

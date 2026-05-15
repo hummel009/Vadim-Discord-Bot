@@ -25,7 +25,7 @@ class StartServiceImpl : StartService {
 
 			withStringOption("add_connection", "[discord_channel_id] [telegram_chat_id]"),
 			withStringOption("add_manager_role", "[role_id]"),
-			withStringOption("set_language", "[${Lang.entries.joinToString("/")}]"),
+			withStringOption("set_language", "[${Lang.entries.joinToString("|")}]"),
 
 			withStringOption("clear_connections", "{discord_channel_id} {telegram_chat_id}", false),
 			withStringOption("clear_manager_roles", "{role_id}", false),
@@ -41,9 +41,9 @@ class StartServiceImpl : StartService {
 
 	private fun withStringOption(command: String, parameters: String, obligatory: Boolean = true): SlashCommandData =
 		Commands.slash(command, "/$command $parameters")
-			.addOptions(OptionData(OptionType.STRING, "arguments", "The list of arguments", obligatory))
+			.addOptions(OptionData(OptionType.STRING, "arguments", parameters, obligatory))
 
 	private fun withAttachmentOption(command: String): SlashCommandData =
 		Commands.slash(command, "/$command")
-			.addOptions(OptionData(OptionType.ATTACHMENT, "arguments", "The list of arguments", true))
+			.addOptions(OptionData(OptionType.ATTACHMENT, "arguments", "", true))
 }

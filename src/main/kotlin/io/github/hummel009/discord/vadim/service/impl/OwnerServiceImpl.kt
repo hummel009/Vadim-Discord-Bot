@@ -93,9 +93,7 @@ class OwnerServiceImpl : OwnerService {
 			} else {
 				val embed = EmbedBuilder().success(event.member, I18n.of("exit", guildData))
 
-				event.hook.sendMessageEmbeds(embed).queue {
-					exitProcess(0)
-				}
+				event.hook.sendMessageEmbeds(embed).queue { exitProcess(0) }
 			}
 		}
 	}
