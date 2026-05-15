@@ -12,10 +12,6 @@ data class FileWrapper(
 ) {
 	private val fileDao: FileDao = DaoFactory.fileDao
 
-	override fun equals(other: Any?): Boolean = false
-
-	override fun hashCode(): Int = 0
-
 	fun allocateWithPath(): String {
 		val tempFolderPath = "temp"
 		val tempFilePath = "temp/${System.currentTimeMillis()}.$fileExtension"
@@ -29,5 +25,29 @@ data class FileWrapper(
 
 	fun freeWithPath(tempFilePath: String) {
 		fileDao.removeFile(tempFilePath)
+	}
+
+	override fun equals(other: Any?): Boolean {
+		if (this === other) return true
+		if (javaClass != other?.javaClass) return false
+
+		other as FileWrapper
+
+		if (isSpoiler != other.isSpoiler) return false
+		if (!fileBytes.contentEquals(other.fileBytes)) return false
+		if (fileExtension != other.fileExtension) return false
+		if (fileType != other.fileType) return false
+		if (fileDao != other.fileDao) return false
+
+		return true
+	}
+
+	override fun hashCode(): Int {
+		var result = isSpoiler?.hashCode() ?: 0
+		result = 31 * result + fileBytes.contentHashCode()
+		result = 31 * result + (fileExtension?.hashCode() ?: 0)
+		result = 31 * result + fileType.hashCode()
+		result = 31 * result + fileDao.hashCode()
+		return result
 	}
 }
