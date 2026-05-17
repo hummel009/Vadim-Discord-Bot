@@ -38,7 +38,7 @@ class TelegramServiceImpl : TelegramService {
 
 				val fileBytes = downloadWithLimit(photo.fileId, photo.fileSize.toLong())
 				val wrapper = fileBytes?.let {
-					FileWrapper(it, "mp3", FileType.AUDIO, update.message.hasMediaSpoiler)
+					FileWrapper(it, "jpg", FileType.PHOTO, update.message.hasMediaSpoiler)
 				}
 				fileWrappers.add(wrapper)
 			}
