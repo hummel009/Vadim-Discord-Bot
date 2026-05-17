@@ -120,7 +120,7 @@ data class MessageWrapper(
 		for (ch in str) {
 			val index = signatureAlphabet.indexOf(ch)
 			if (index == -1) {
-				throw Exception()
+				return 0
 			}
 			result = result * base + index
 		}
