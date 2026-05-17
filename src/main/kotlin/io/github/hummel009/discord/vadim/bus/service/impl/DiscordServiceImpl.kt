@@ -22,6 +22,14 @@ class DiscordServiceImpl : DiscordService {
 	override fun receive(event: MessageReceivedEvent): MessageWrapper {
 		val fileWrappers = mutableListOf<FileWrapper?>()
 
+		fun downloadWithLimit(url: String, size: Int): ByteArray? {
+			return if (size <= 9_999_999) {
+				URI(url).toURL().readBytes()
+			} else {
+				null
+			}
+		}
+
 		for (attachment in event.message.attachments) {
 			val fileExtension = attachment.fileExtension?.lowercase()
 
@@ -29,83 +37,59 @@ class DiscordServiceImpl : DiscordService {
 				listOf("png", "jpg", "jpeg").any {
 					fileExtension?.lowercase() == it
 				} -> {
-					if (attachment.size <= 9_999_999) {
-						val fileBytes = URI(attachment.proxyUrl).toURL().readBytes()
-
-						fileWrappers.add(
-							FileWrapper(fileBytes, "jpg", FileType.PHOTO, attachment.isSpoiler)
-						)
-					} else {
-						fileWrappers.add(null)
+					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
+					val wrapper = fileBytes?.let {
+						FileWrapper(it, "jpg", FileType.PHOTO, attachment.isSpoiler)
 					}
+					fileWrappers.add(wrapper)
 				}
 
 				listOf("mp4").any {
 					fileExtension?.lowercase() == it
 				} -> {
-					if (attachment.size <= 9_999_999) {
-						val fileBytes = URI(attachment.proxyUrl).toURL().readBytes()
-
-						fileWrappers.add(
-							FileWrapper(fileBytes, "mp4", FileType.VIDEO, attachment.isSpoiler)
-						)
-					} else {
-						fileWrappers.add(null)
+					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
+					val wrapper = fileBytes?.let {
+						FileWrapper(it, "mp4", FileType.VIDEO, attachment.isSpoiler)
 					}
+					fileWrappers.add(wrapper)
 				}
 
 				listOf("mp3").any {
 					fileExtension?.lowercase() == it
 				} -> {
-					if (attachment.size <= 9_999_999) {
-						val fileBytes = URI(attachment.proxyUrl).toURL().readBytes()
-
-						fileWrappers.add(
-							FileWrapper(fileBytes, "mp3", FileType.AUDIO, attachment.isSpoiler)
-						)
-					} else {
-						fileWrappers.add(null)
+					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
+					val wrapper = fileBytes?.let {
+						FileWrapper(it, "mp3", FileType.AUDIO, attachment.isSpoiler)
 					}
+					fileWrappers.add(wrapper)
 				}
 
 				listOf("ogg").any {
 					fileExtension?.lowercase() == it
 				} -> {
-					if (attachment.size <= 9_999_999) {
-						val fileBytes = URI(attachment.proxyUrl).toURL().readBytes()
-
-						fileWrappers.add(
-							FileWrapper(fileBytes, "ogg", FileType.VOICE, attachment.isSpoiler)
-						)
-					} else {
-						fileWrappers.add(null)
+					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
+					val wrapper = fileBytes?.let {
+						FileWrapper(it, "ogg", FileType.VOICE, attachment.isSpoiler)
 					}
+					fileWrappers.add(wrapper)
 				}
 
 				listOf("gif").any {
 					fileExtension?.lowercase() == it
 				} -> {
-					if (attachment.size <= 9_999_999) {
-						val fileBytes = URI(attachment.proxyUrl).toURL().readBytes()
-
-						fileWrappers.add(
-							FileWrapper(fileBytes, "gif", FileType.GIF, attachment.isSpoiler)
-						)
-					} else {
-						fileWrappers.add(null)
+					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
+					val wrapper = fileBytes?.let {
+						FileWrapper(it, "gif", FileType.GIF, attachment.isSpoiler)
 					}
+					fileWrappers.add(wrapper)
 				}
 
 				else -> {
-					if (attachment.size <= 9_999_999) {
-						val fileBytes = URI(attachment.proxyUrl).toURL().readBytes()
-
-						fileWrappers.add(
-							FileWrapper(fileBytes, fileExtension, FileType.DOC, attachment.isSpoiler)
-						)
-					} else {
-						fileWrappers.add(null)
+					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
+					val wrapper = fileBytes?.let {
+						FileWrapper(it, fileExtension, FileType.DOC, attachment.isSpoiler)
 					}
+					fileWrappers.add(wrapper)
 				}
 			}
 		}

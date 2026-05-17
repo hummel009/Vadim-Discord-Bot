@@ -23,95 +23,64 @@ class TelegramServiceImpl : TelegramService {
 	override fun receive(update: Update): MessageWrapper {
 		val fileWrappers = mutableListOf<FileWrapper?>()
 
+		fun downloadWithLimit(id: String, size: Long): ByteArray? {
+			return if (size <= 9_999_999) {
+				val url = ApiHolder.telegram.execute(GetFile(id)).getFileUrl(config.telegramToken)
+				URI(url).toURL().readBytes()
+			} else {
+				null
+			}
+		}
+
 		when {
 			update.message.photo != null -> {
 				val photo = update.message.photo.last()
 
-				if (photo.fileSize <= 9_999_999) {
-					val fileBytes = URI(
-						ApiHolder.telegram.execute(
-							GetFile(photo.fileId)
-						).getFileUrl(config.telegramToken)
-					).toURL().readBytes()
-
-					fileWrappers.add(
-						FileWrapper(fileBytes, "jpg", FileType.PHOTO, update.message.hasMediaSpoiler)
-					)
-				} else {
-					fileWrappers.add(null)
+				val fileBytes = downloadWithLimit(photo.fileId, photo.fileSize.toLong())
+				val wrapper = fileBytes?.let {
+					FileWrapper(it, "mp3", FileType.AUDIO, update.message.hasMediaSpoiler)
 				}
+				fileWrappers.add(wrapper)
 			}
 
 			update.message.video != null -> {
 				val video = update.message.video
 
-				if (video.fileSize <= 9_999_999) {
-					val fileBytes = URI(
-						ApiHolder.telegram.execute(
-							GetFile(video.fileId)
-						).getFileUrl(config.telegramToken)
-					).toURL().readBytes()
-
-					fileWrappers.add(
-						FileWrapper(fileBytes, "mp4", FileType.VIDEO, update.message.hasMediaSpoiler)
-					)
-				} else {
-					fileWrappers.add(null)
+				val fileBytes = downloadWithLimit(video.fileId, video.fileSize)
+				val wrapper = fileBytes?.let {
+					FileWrapper(it, "mp4", FileType.VIDEO, update.message.hasMediaSpoiler)
 				}
+				fileWrappers.add(wrapper)
 			}
 
 			update.message.audio != null -> {
 				val audio = update.message.audio
 
-				if (audio.fileSize <= 9_999_999) {
-					val fileBytes = URI(
-						ApiHolder.telegram.execute(
-							GetFile(audio.fileId)
-						).getFileUrl(config.telegramToken)
-					).toURL().readBytes()
-
-					fileWrappers.add(
-						FileWrapper(fileBytes, "mp3", FileType.AUDIO, update.message.hasMediaSpoiler)
-					)
-				} else {
-					fileWrappers.add(null)
+				val fileBytes = downloadWithLimit(audio.fileId, audio.fileSize)
+				val wrapper = fileBytes?.let {
+					FileWrapper(it, "mp3", FileType.AUDIO, update.message.hasMediaSpoiler)
 				}
+				fileWrappers.add(wrapper)
 			}
 
 			update.message.voice != null -> {
 				val voice = update.message.voice
 
-				if (voice.fileSize <= 9_999_999) {
-					val fileBytes = URI(
-						ApiHolder.telegram.execute(
-							GetFile(voice.fileId)
-						).getFileUrl(config.telegramToken)
-					).toURL().readBytes()
-
-					fileWrappers.add(
-						FileWrapper(fileBytes, "ogg", FileType.VOICE, update.message.hasMediaSpoiler)
-					)
-				} else {
-					fileWrappers.add(null)
+				val fileBytes = downloadWithLimit(voice.fileId, voice.fileSize)
+				val wrapper = fileBytes?.let {
+					FileWrapper(it, "ogg", FileType.VOICE, update.message.hasMediaSpoiler)
 				}
+				fileWrappers.add(wrapper)
 			}
 
 			update.message.document != null -> {
 				val doc = update.message.document
 
-				if (doc.fileSize <= 9_999_999) {
-					val fileBytes = URI(
-						ApiHolder.telegram.execute(
-							GetFile(doc.fileId)
-						).getFileUrl(config.telegramToken)
-					).toURL().readBytes()
-
-					fileWrappers.add(
-						FileWrapper(fileBytes, doc.fileName.ext(), FileType.DOC, update.message.hasMediaSpoiler)
-					)
-				} else {
-					fileWrappers.add(null)
+				val fileBytes = downloadWithLimit(doc.fileId, doc.fileSize)
+				val wrapper = fileBytes?.let {
+					FileWrapper(it, doc.fileName.ext(), FileType.DOC, update.message.hasMediaSpoiler)
 				}
+				fileWrappers.add(wrapper)
 			}
 		}
 
