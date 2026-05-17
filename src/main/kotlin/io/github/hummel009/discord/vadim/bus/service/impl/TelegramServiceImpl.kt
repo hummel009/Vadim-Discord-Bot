@@ -138,6 +138,33 @@ class TelegramServiceImpl : TelegramService {
 	}
 
 	private fun String.split(): List<String> {
+		fun findSplitIndex(text: String, maxLength: Int): Int {
+			val textToCheck = text.take(maxLength)
+
+			val lastParagraph = textToCheck.lastIndexOf("\n\n")
+			if (lastParagraph > 0 && lastParagraph < maxLength - 10) {
+				return lastParagraph + 2
+			}
+
+			val lastDotSpace = textToCheck.lastIndexOf(". ")
+			if (lastDotSpace > 0 && lastDotSpace < maxLength - 5) {
+				return lastDotSpace + 2
+			}
+
+			val punctuationPattern = "[!?;:] ".toRegex()
+			val match = punctuationPattern.findAll(textToCheck).lastOrNull { it.range.last < maxLength - 5 }
+			if (match != null) {
+				return match.range.last + 1
+			}
+
+			val lastSpace = textToCheck.lastIndexOf(' ')
+			if (lastSpace > 0 && lastSpace < maxLength - 5) {
+				return lastSpace + 1
+			}
+
+			return maxLength
+		}
+
 		if (length <= 1999) {
 			return listOf(this)
 		}
@@ -156,32 +183,5 @@ class TelegramServiceImpl : TelegramService {
 		}
 
 		return parts
-	}
-
-	private fun findSplitIndex(text: String, maxLength: Int): Int {
-		val textToCheck = text.take(maxLength)
-
-		val lastParagraph = textToCheck.lastIndexOf("\n\n")
-		if (lastParagraph > 0 && lastParagraph < maxLength - 10) {
-			return lastParagraph + 2
-		}
-
-		val lastDotSpace = textToCheck.lastIndexOf(". ")
-		if (lastDotSpace > 0 && lastDotSpace < maxLength - 5) {
-			return lastDotSpace + 2
-		}
-
-		val punctuationPattern = "[!?;:] ".toRegex()
-		val match = punctuationPattern.findAll(textToCheck).lastOrNull { it.range.last < maxLength - 5 }
-		if (match != null) {
-			return match.range.last + 1
-		}
-
-		val lastSpace = textToCheck.lastIndexOf(' ')
-		if (lastSpace > 0 && lastSpace < maxLength - 5) {
-			return lastSpace + 1
-		}
-
-		return maxLength
 	}
 }
