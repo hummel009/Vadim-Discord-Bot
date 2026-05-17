@@ -70,6 +70,16 @@ class TelegramServiceImpl : TelegramService {
 				fileWrappers.add(wrapper)
 			}
 
+			update.message.animation != null -> {
+				val animation = update.message.animation
+
+				val fileBytes = downloadWithLimit(animation.fileId, animation.fileSize)
+				val wrapper = fileBytes?.let {
+					FileWrapper(it, "gif", FileType.GIF, update.message.hasMediaSpoiler)
+				}
+				fileWrappers.add(wrapper)
+			}
+
 			update.message.document != null -> {
 				val doc = update.message.document
 
