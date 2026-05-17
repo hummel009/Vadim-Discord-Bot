@@ -29,7 +29,7 @@ class DiscordServiceImpl : DiscordService {
 			val fileExtension = attachment.fileExtension?.lowercase()
 
 			when {
-				listOf("png", "jpg", "jpeg").any {
+				listOf("png", "jpg", "jpeg", "webp", "svg", "tiff").any {
 					fileExtension?.lowercase() == it
 				} -> {
 					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
@@ -39,7 +39,7 @@ class DiscordServiceImpl : DiscordService {
 					fileWrappers.add(wrapper)
 				}
 
-				listOf("mp4", "mov").any {
+				listOf("mp4", "mpg", "mpeg", "webm", "mov", "avi").any {
 					fileExtension?.lowercase() == it
 				} -> {
 					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
