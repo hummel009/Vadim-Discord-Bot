@@ -5,8 +5,6 @@ import io.github.hummel009.discord.vadim.service.DataService
 import io.github.hummel009.discord.vadim.service.MemberService
 import io.github.hummel009.discord.vadim.utils.I18n
 import io.github.hummel009.discord.vadim.utils.getMessageChannelById
-import io.github.hummel009.discord.vadim.utils.success
-import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
 class MemberServiceImpl : MemberService {
@@ -57,7 +55,7 @@ class MemberServiceImpl : MemberService {
 
 			dataService.saveGuildData(guild, guildData)
 
-			val embed = EmbedBuilder().success(event.member, I18n.new(text, guildData))
+			val embed = I18n.new(text, guildData).asSuccess(event.member)
 
 			event.hook.sendMessageEmbeds(embed).queue()
 		}
