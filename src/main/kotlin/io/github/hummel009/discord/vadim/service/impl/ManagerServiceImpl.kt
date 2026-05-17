@@ -74,7 +74,7 @@ class ManagerServiceImpl : ManagerService {
 
 				try {
 					val roleId = arguments[0].toLong().also {
-						require(guild.getRoleById(it) != null)
+						requireNotNull(guild.getRoleById(it))
 					}
 
 					guildData.managerRoleIds.add(roleId)
@@ -120,7 +120,7 @@ class ManagerServiceImpl : ManagerService {
 
 				try {
 					val roleId = arguments[0].toLong().also {
-						require(guild.getRoleById(it) != null)
+						requireNotNull(guild.getRoleById(it))
 					}
 
 					require(guildData.managerRoleIds.removeIf { it == roleId })
@@ -160,7 +160,7 @@ class ManagerServiceImpl : ManagerService {
 
 				try {
 					val discordChannelId = arguments[0].toLong().also {
-						require(guild.getMessageChannelById(it) != null)
+						requireNotNull(guild.getMessageChannelById(it))
 					}
 					val telegramChatId = arguments[1].toLong()
 
@@ -212,7 +212,7 @@ class ManagerServiceImpl : ManagerService {
 
 				try {
 					val discordChannelId = arguments[0].toLong().also {
-						require(guild.getMessageChannelById(it) != null)
+						requireNotNull(guild.getMessageChannelById(it))
 					}
 					val telegramChatId = arguments[1].toLong()
 
