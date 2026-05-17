@@ -34,17 +34,17 @@ class DiscordServiceImpl : DiscordService {
 				} -> {
 					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
 					val wrapper = fileBytes?.let {
-						FileWrapper(it, "jpg", FileType.PHOTO, attachment.isSpoiler)
+						FileWrapper(it, fileExtension, FileType.PHOTO, attachment.isSpoiler)
 					}
 					fileWrappers.add(wrapper)
 				}
 
-				listOf("mp4").any {
+				listOf("mp4", "mov").any {
 					fileExtension?.lowercase() == it
 				} -> {
 					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
 					val wrapper = fileBytes?.let {
-						FileWrapper(it, "mp4", FileType.VIDEO, attachment.isSpoiler)
+						FileWrapper(it, fileExtension, FileType.VIDEO, attachment.isSpoiler)
 					}
 					fileWrappers.add(wrapper)
 				}
@@ -54,7 +54,7 @@ class DiscordServiceImpl : DiscordService {
 				} -> {
 					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
 					val wrapper = fileBytes?.let {
-						FileWrapper(it, "mp3", FileType.AUDIO, attachment.isSpoiler)
+						FileWrapper(it, fileExtension, FileType.AUDIO, attachment.isSpoiler)
 					}
 					fileWrappers.add(wrapper)
 				}
@@ -64,7 +64,7 @@ class DiscordServiceImpl : DiscordService {
 				} -> {
 					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
 					val wrapper = fileBytes?.let {
-						FileWrapper(it, "ogg", FileType.VOICE, attachment.isSpoiler)
+						FileWrapper(it, fileExtension, FileType.VOICE, attachment.isSpoiler)
 					}
 					fileWrappers.add(wrapper)
 				}
@@ -74,7 +74,7 @@ class DiscordServiceImpl : DiscordService {
 				} -> {
 					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
 					val wrapper = fileBytes?.let {
-						FileWrapper(it, "gif", FileType.GIF, attachment.isSpoiler)
+						FileWrapper(it, fileExtension, FileType.GIF, attachment.isSpoiler)
 					}
 					fileWrappers.add(wrapper)
 				}
