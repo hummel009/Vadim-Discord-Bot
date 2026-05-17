@@ -23,11 +23,11 @@ class ManagerServiceImpl : ManagerService {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
-			val embed = run(fun(): MessageEmbed {
-				if (!accessService.fromManagerAtLeast(event, guildData)) {
-					return EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-				}
+			accessService.managerAccessRestricted(event, guildData)?.let {
+				return@queue
+			}
 
+			val embed = run(fun(): MessageEmbed {
 				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
 				if (arguments.size != 1) {
 					return EmbedBuilder().error(event.member, I18n.of("msg_error_arg", guildData))
@@ -62,11 +62,11 @@ class ManagerServiceImpl : ManagerService {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
-			val embed = run(fun(): MessageEmbed {
-				if (!accessService.fromManagerAtLeast(event, guildData)) {
-					return EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-				}
+			accessService.managerAccessRestricted(event, guildData)?.let {
+				return@queue
+			}
 
+			val embed = run(fun(): MessageEmbed {
 				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
 				if (arguments.size != 1) {
 					return EmbedBuilder().error(event.member, I18n.of("msg_error_arg", guildData))
@@ -102,11 +102,11 @@ class ManagerServiceImpl : ManagerService {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
-			val embed = run(fun(): MessageEmbed {
-				if (!accessService.fromManagerAtLeast(event, guildData)) {
-					return EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-				}
+			accessService.managerAccessRestricted(event, guildData)?.let {
+				return@queue
+			}
 
+			val embed = run(fun(): MessageEmbed {
 				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
 				if (arguments.size !in 0..1) {
 					return EmbedBuilder().error(event.member, I18n.of("msg_error_arg", guildData))
@@ -148,11 +148,11 @@ class ManagerServiceImpl : ManagerService {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
-			val embed = run(fun(): MessageEmbed {
-				if (!accessService.fromManagerAtLeast(event, guildData)) {
-					return EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-				}
+			accessService.managerAccessRestricted(event, guildData)?.let {
+				return@queue
+			}
 
+			val embed = run(fun(): MessageEmbed {
 				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
 				if (arguments.size != 2) {
 					return EmbedBuilder().error(event.member, I18n.of("msg_error_arg", guildData))
@@ -195,11 +195,11 @@ class ManagerServiceImpl : ManagerService {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
-			val embed = run(fun(): MessageEmbed {
-				if (!accessService.fromManagerAtLeast(event, guildData)) {
-					return EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-				}
+			accessService.managerAccessRestricted(event, guildData)?.let {
+				return@queue
+			}
 
+			val embed = run(fun(): MessageEmbed {
 				val arguments = event.getOption("arguments")?.asString?.split(" ") ?: emptyList()
 				if (arguments.size !in 0..1) {
 					return EmbedBuilder().error(event.member, I18n.of("msg_error_arg", guildData))
@@ -245,11 +245,11 @@ class ManagerServiceImpl : ManagerService {
 			val guildData = dataService.loadGuildData(guild)
 			val globalData = dataService.loadGlobalData()
 
-			val embed = run(fun(): MessageEmbed {
-				if (!accessService.fromManagerAtLeast(event, guildData)) {
-					return EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-				}
+			accessService.managerAccessRestricted(event, guildData)?.let {
+				return@queue
+			}
 
+			val embed = run(fun(): MessageEmbed {
 				try {
 					require(guildData.localBus.isNotEmpty())
 
@@ -283,11 +283,11 @@ class ManagerServiceImpl : ManagerService {
 			val guildData = dataService.loadGuildData(guild)
 			val globalData = dataService.loadGlobalData()
 
-			val embed = run(fun(): MessageEmbed {
-				if (!accessService.fromManagerAtLeast(event, guildData)) {
-					return EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-				}
+			accessService.managerAccessRestricted(event, guildData)?.let {
+				return@queue
+			}
 
+			val embed = run(fun(): MessageEmbed {
 				try {
 					require(globalData.globalBus.removeIf {
 						it.guildId == guild.idLong
@@ -314,15 +314,15 @@ class ManagerServiceImpl : ManagerService {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
-			val embed = run(fun(): MessageEmbed {
-				if (!accessService.fromManagerAtLeast(event, guildData)) {
-					return EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-				}
+			accessService.managerAccessRestricted(event, guildData)?.let {
+				return@queue
+			}
 
+			val embed = run {
 				dataService.wipeGuildData(guild)
 
-				return EmbedBuilder().success(event.member, I18n.of("wipe_data", guildData))
-			})
+				EmbedBuilder().success(event.member, I18n.of("wipe_data", guildData))
+			}
 
 			event.hook.sendMessageEmbeds(embed).queue()
 		}

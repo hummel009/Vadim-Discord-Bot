@@ -27,25 +27,23 @@ class OwnerServiceImpl : OwnerService {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
-			if (!accessService.fromOwnerAtLeast(event)) {
-				val embed = EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
+			accessService.ownerAccessRestricted(event, guildData)?.let {
+				return@queue
+			}
+
+			try {
+				val attachment = requireNotNull(event.getOption("arguments")?.asAttachment)
+				val byteArray = URI(attachment.proxyUrl).toURL().readBytes()
+
+				dataService.importBotData(byteArray)
+
+				val embed = EmbedBuilder().success(event.member, I18n.of("import", guildData))
 
 				event.hook.sendMessageEmbeds(embed).queue()
-			} else {
-				try {
-					val attachment = requireNotNull(event.getOption("arguments")?.asAttachment)
-					val byteArray = URI(attachment.proxyUrl).toURL().readBytes()
+			} catch (_: Exception) {
+				val embed = EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
 
-					dataService.importBotData(byteArray)
-
-					val embed = EmbedBuilder().success(event.member, I18n.of("import", guildData))
-
-					event.hook.sendMessageEmbeds(embed).queue()
-				} catch (_: Exception) {
-					val embed = EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
-
-					event.hook.sendMessageEmbeds(embed).queue()
-				}
+				event.hook.sendMessageEmbeds(embed).queue()
 			}
 		}
 	}
@@ -59,21 +57,13 @@ class OwnerServiceImpl : OwnerService {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
-			if (!accessService.fromOwnerAtLeast(event)) {
-				val embed = EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-
-				event.hook.sendMessageEmbeds(embed).queue()
-			} else {
-				try {
-					val byteArray = dataService.exportBotData()
-
-					event.hook.sendFiles(FileUpload.fromData(byteArray, "bot.zip")).queue()
-				} catch (_: Exception) {
-					val embed = EmbedBuilder().error(event.member, I18n.of("msg_error_format", guildData))
-
-					event.hook.sendMessageEmbeds(embed).queue()
-				}
+			accessService.ownerAccessRestricted(event, guildData)?.let {
+				return@queue
 			}
+
+			val byteArray = dataService.exportBotData()
+
+			event.hook.sendFiles(FileUpload.fromData(byteArray, "bot.zip")).queue()
 		}
 	}
 
@@ -86,15 +76,13 @@ class OwnerServiceImpl : OwnerService {
 			val guild = event.guild ?: return@queue
 			val guildData = dataService.loadGuildData(guild)
 
-			if (!accessService.fromOwnerAtLeast(event)) {
-				val embed = EmbedBuilder().access(event.member, I18n.of("msg_access", guildData))
-
-				event.hook.sendMessageEmbeds(embed).queue()
-			} else {
-				val embed = EmbedBuilder().success(event.member, I18n.of("exit", guildData))
-
-				event.hook.sendMessageEmbeds(embed).queue { exitProcess(0) }
+			accessService.ownerAccessRestricted(event, guildData)?.let {
+				return@queue
 			}
+
+			val embed = EmbedBuilder().success(event.member, I18n.of("exit", guildData))
+
+			event.hook.sendMessageEmbeds(embed).queue { exitProcess(0) }
 		}
 	}
 }

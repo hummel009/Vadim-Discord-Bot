@@ -1,9 +1,10 @@
 package io.github.hummel009.discord.vadim.service
 
 import io.github.hummel009.discord.vadim.bean.GuildData
+import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
 interface AccessService {
-	fun fromManagerAtLeast(event: SlashCommandInteractionEvent, guildData: GuildData): Boolean
-	fun fromOwnerAtLeast(event: SlashCommandInteractionEvent): Boolean
+	fun managerAccessRestricted(event: SlashCommandInteractionEvent, guildData: GuildData): MessageEmbed?
+	fun ownerAccessRestricted(event: SlashCommandInteractionEvent, guildData: GuildData): MessageEmbed?
 }
