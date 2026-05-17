@@ -22,9 +22,8 @@ class DiscordServiceImpl : DiscordService {
 	override fun receive(event: MessageReceivedEvent): MessageWrapper {
 		val fileWrappers = mutableListOf<FileWrapper?>()
 
-		fun downloadWithLimit(url: String, size: Int): ByteArray? {
-			return URI(url).takeIf { size <= 9_999_999 }?.toURL()?.readBytes()
-		}
+		fun downloadWithLimit(url: String, size: Int): ByteArray? =
+			URI(url).takeIf { size <= 9_999_999 }?.toURL()?.readBytes()
 
 		for (attachment in event.message.attachments) {
 			val fileExtension = attachment.fileExtension?.lowercase()
