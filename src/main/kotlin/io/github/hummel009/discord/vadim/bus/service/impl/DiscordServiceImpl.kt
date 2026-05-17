@@ -23,11 +23,7 @@ class DiscordServiceImpl : DiscordService {
 		val fileWrappers = mutableListOf<FileWrapper?>()
 
 		fun downloadWithLimit(url: String, size: Int): ByteArray? {
-			return if (size <= 9_999_999) {
-				URI(url).toURL().readBytes()
-			} else {
-				null
-			}
+			return URI(url).takeIf { size <= 9_999_999 }?.toURL()?.readBytes()
 		}
 
 		for (attachment in event.message.attachments) {
