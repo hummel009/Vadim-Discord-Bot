@@ -16,7 +16,7 @@ data class MessageWrapper(
 		replace("  ", " ").replace(" ", "_")
 	}
 
-	private val replyToQuote: String? = replyToRaw?.takeIf {
+	private val replyQuote: String? = replyToRaw?.takeIf {
 		!it.contains(signatureStart)
 	}?.let { text ->
 		val quote = text.replace("\n", " ").take(32).let {
@@ -26,7 +26,7 @@ data class MessageWrapper(
 	}
 
 	private val preText: String = run {
-		if ("\n" in textRaw || replyToQuote !== null && textRaw.length > 128) "\n\n" else " "
+		if ("\n" in textRaw || replyQuote !== null && textRaw.length > 128) "\n\n" else " "
 	}
 
 	private val text: String = with(textRaw) {
@@ -34,20 +34,20 @@ data class MessageWrapper(
 	}
 
 	private val postText: String = run {
-		if ("\n" in textRaw || replyToQuote !== null && textRaw.length > 128) "\n\n" else "\n"
+		if ("\n" in textRaw || replyQuote !== null && textRaw.length > 128) "\n\n" else "\n"
 	}
 
 	private val signature: String = run {
 		"$signatureStart${signatureRaw.toLong().encode()}"
 	}
 
-	fun isCaption(): Boolean = replyToQuote == null && text.isBlank()
+	fun isCaption(): Boolean = replyQuote == null && text.isBlank()
 
-	fun asMessage(): String = "`#$author`${replyToQuote ?: ""}:$preText$text$postText||$signature||"
+	fun asMessage(): String = "`#$author`${replyQuote ?: ""}:$preText$text$postText||$signature||"
 
 	fun asCaption(): String = "`#$author` ||$signature||"
 
-	fun getReplyToId(): Long? = replyToRaw?.takeIf {
+	fun getReplyId(): Long? = replyToRaw?.takeIf {
 		it.contains(signatureStart)
 	}?.substringAfter(signatureStart)?.decode()
 
