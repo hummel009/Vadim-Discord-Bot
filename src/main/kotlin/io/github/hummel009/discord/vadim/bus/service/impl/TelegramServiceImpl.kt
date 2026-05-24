@@ -110,7 +110,7 @@ class TelegramServiceImpl : TelegramService {
 			parts.forEachIndexed { index, part ->
 				discordChannel.sendMessage(part).apply {
 					if (index == 0) {
-						m.getReplyToIdIfOtherSide()?.let {
+						m.getReplyToId()?.let {
 							setMessageReference(it)
 						}
 					}

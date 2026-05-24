@@ -106,7 +106,7 @@ class DiscordServiceImpl : DiscordService {
 				chatId(otherId)
 				text(m.asMessage())
 				parseMode(ParseMode.MARKDOWNV2)
-				m.getReplyToIdIfOtherSide()?.let {
+				m.getReplyToId()?.let {
 					replyToMessageId(it.toInt())
 				}
 			}.build())
