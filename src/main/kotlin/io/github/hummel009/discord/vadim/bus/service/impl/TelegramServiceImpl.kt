@@ -106,25 +106,27 @@ class TelegramServiceImpl : TelegramService {
 		val discordChannel = ApiHolder.discord.getMessageChannelById(otherId) ?: return
 
 		if (!m.isCaption()) {
-			val parts = m.textMessage.split()
+			val parts = m.asMessage().split()
 			parts.forEachIndexed { index, part ->
 				discordChannel.sendMessage(part).apply {
-					if (index == 0 && m.replyToIdIfOtherSide != null) {
-						setMessageReference(m.replyToIdIfOtherSide)
+					if (index == 0) {
+						m.getReplyToIdIfOtherSide()?.let {
+							setMessageReference(it)
+						}
 					}
 					queue()
 				}
 			}
 		}
 
-		for (fw in m.fileWrappers) {
+		for (fw in m.getFileWrappers()) {
 			when (fw.fileType) {
 				FileType.PHOTO, FileType.VIDEO, FileType.AUDIO, FileType.VOICE, FileType.GIF, FileType.DOC -> {
 					val filePath = fw.allocateWithPath()
 					val file = fileDao.getFile(filePath)
 
 					val fileName = if (fw.isSpoiler == true) "SPOILER_${file.name}" else file.name
-					discordChannel.sendFiles(FileUpload.fromData(file, fileName)).setContent(m.textCaption).queue {
+					discordChannel.sendFiles(FileUpload.fromData(file, fileName)).setContent(m.asCaption()).queue {
 						fw.freeWithPath(filePath)
 					}
 				}
@@ -135,7 +137,7 @@ class TelegramServiceImpl : TelegramService {
 						text(I18n.of("file_limit", guildData).s())
 					}.build())
 
-					discordChannel.sendMessage(m.textCaption + "\n\n" + I18n.of("file_limit", guildData)).queue()
+					discordChannel.sendMessage(m.asCaption() + "\n\n" + I18n.of("file_limit", guildData)).queue()
 				}
 			}
 		}

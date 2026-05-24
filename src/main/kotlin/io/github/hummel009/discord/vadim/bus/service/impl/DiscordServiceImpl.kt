@@ -104,15 +104,15 @@ class DiscordServiceImpl : DiscordService {
 		if (!m.isCaption()) {
 			ApiHolder.telegram.execute(SendMessage.builder().apply {
 				chatId(otherId)
-				text(m.textMessage)
+				text(m.asMessage())
 				parseMode(ParseMode.MARKDOWNV2)
-				if (m.replyToIdIfOtherSide != null) {
-					replyToMessageId(m.replyToIdIfOtherSide.toInt())
+				m.getReplyToIdIfOtherSide()?.let {
+					replyToMessageId(it.toInt())
 				}
 			}.build())
 		}
 
-		for (fw in m.fileWrappers) {
+		for (fw in m.getFileWrappers()) {
 			when (fw.fileType) {
 				FileType.PHOTO -> {
 					val filePath = fw.allocateWithPath()
@@ -123,7 +123,7 @@ class DiscordServiceImpl : DiscordService {
 						photo(InputFile(file))
 						hasSpoiler(fw.isSpoiler)
 						parseMode(ParseMode.MARKDOWNV2)
-						caption(m.textCaption)
+						caption(m.asCaption())
 					}.build())
 
 					fw.freeWithPath(filePath)
@@ -138,7 +138,7 @@ class DiscordServiceImpl : DiscordService {
 						video(InputFile(file))
 						hasSpoiler(fw.isSpoiler)
 						parseMode(ParseMode.MARKDOWNV2)
-						caption(m.textCaption)
+						caption(m.asCaption())
 					}.build())
 
 					fw.freeWithPath(filePath)
@@ -152,7 +152,7 @@ class DiscordServiceImpl : DiscordService {
 						chatId(otherId)
 						audio(InputFile(file))
 						parseMode(ParseMode.MARKDOWNV2)
-						caption(m.textCaption)
+						caption(m.asCaption())
 					}.build())
 
 					fw.freeWithPath(filePath)
@@ -166,7 +166,7 @@ class DiscordServiceImpl : DiscordService {
 						chatId(otherId)
 						voice(InputFile(file))
 						parseMode(ParseMode.MARKDOWNV2)
-						caption(m.textCaption)
+						caption(m.asCaption())
 					}.build())
 
 					fw.freeWithPath(filePath)
@@ -181,7 +181,7 @@ class DiscordServiceImpl : DiscordService {
 						animation(InputFile(file))
 						hasSpoiler(fw.isSpoiler)
 						parseMode(ParseMode.MARKDOWNV2)
-						caption(m.textCaption)
+						caption(m.asCaption())
 					}.build())
 
 					fw.freeWithPath(filePath)
@@ -195,7 +195,7 @@ class DiscordServiceImpl : DiscordService {
 						chatId(otherId)
 						document(InputFile(file))
 						parseMode(ParseMode.MARKDOWNV2)
-						caption(m.textCaption)
+						caption(m.asCaption())
 					}.build())
 
 					fw.freeWithPath(filePath)
@@ -206,7 +206,7 @@ class DiscordServiceImpl : DiscordService {
 
 					ApiHolder.telegram.execute(SendMessage.builder().apply {
 						chatId(otherId)
-						text(m.textCaption + "\n\n" + I18n.of("file_limit", guildData))
+						text(m.asCaption() + "\n\n" + I18n.of("file_limit", guildData))
 					}.build())
 				}
 			}

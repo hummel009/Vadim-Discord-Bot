@@ -16,36 +16,42 @@ data class MessageWrapper(
 		replace("  ", " ").replace(" ", "_")
 	}
 
-	private val text: String = with(textRaw) {
-		escapeMarkdown()
-	}
-
-	val replyToQuoteIfSelfSide: String? = replyToRaw?.takeIf {
+	private val replyToQuoteIfSelfSide: String? = replyToRaw?.takeIf {
 		!it.contains(signatureStart)
 	}?.let { text ->
 		val quote = text.replace("\n", " ").take(32).let {
 			if (text.length > 32) "$it..." else it
 		}
-		" ➦ `«$quote»`:"
+		" ➦ `«$quote»`"
 	}
 
-	val replyToIdIfOtherSide: Long? = replyToRaw?.takeIf {
-		it.contains(signatureStart)
-	}?.substringAfter(signatureStart)?.decode()
+	private val preText: String = run {
+		if ("\n" in textRaw || replyToQuoteIfSelfSide !== null && textRaw.length > 128) "\n\n" else " "
+	}
+
+	private val text: String = with(textRaw) {
+		escapeMarkdown()
+	}
+
+	private val postText: String = run {
+		if ("\n" in textRaw || replyToQuoteIfSelfSide !== null && textRaw.length > 128) "\n\n" else "\n"
+	}
 
 	private val signature: String = run {
 		"$signatureStart${signatureRaw.toLong().encode()}"
 	}
 
-	private val separator: String = run {
-		if ("\n" in textRaw || replyToQuoteIfSelfSide !== null && textRaw.length > 128) "\n\n" else " "
-	}
+	fun isCaption(): Boolean = replyToQuoteIfSelfSide == null && text.isBlank()
 
-	val textMessage: String = "`#${author}`${replyToQuoteIfSelfSide ?: ":"}${separator}${text}\n\n||${signature}||"
+	fun asMessage(): String = "`#$author`${replyToQuoteIfSelfSide ?: ""}:$preText$text$postText||$signature||"
 
-	val textCaption: String = "`#${author}` ||${signature}||"
+	fun asCaption(): String = "`#$author` ||$signature||"
 
-	val fileWrappers: List<FileWrapper> = run {
+	fun getReplyToIdIfOtherSide(): Long? = replyToRaw?.takeIf {
+		it.contains(signatureStart)
+	}?.substringAfter(signatureStart)?.decode()
+
+	fun getFileWrappers(): List<FileWrapper> = run {
 		val fileWrappersSorted = fileWrappersRaw.filterNotNull().sortedBy {
 			when (it.fileType) {
 				FileType.PHOTO -> 0
@@ -69,8 +75,6 @@ data class MessageWrapper(
 			fileWrappersSorted
 		}
 	}
-
-	fun isCaption(): Boolean = replyToQuoteIfSelfSide == null && text.isBlank()
 
 	private fun String.escapeMarkdown(): String {
 		val specialChars = "_*[]()~`>#+-=|{}.!"
