@@ -5,7 +5,7 @@ import io.github.hummel009.discord.vadim.bus.utils.FileType
 data class MessageWrapper(
 	private val authorRaw: String,
 	private val textRaw: String,
-	private val referencedTextRaw: String?,
+	private val referenceRaw: String?,
 	private val signatureRaw: String,
 	private val fileWrappersRaw: List<FileWrapper?>,
 ) {
@@ -16,7 +16,7 @@ data class MessageWrapper(
 		replace("  ", " ").replace(" ", "_")
 	}
 
-	private val replyQuote: String? = referencedTextRaw?.takeIf {
+	private val replyQuote: String? = referenceRaw?.takeIf {
 		!it.contains(signatureStart)
 	}?.let { text ->
 		val quote = text.replace("\n", " ").take(32).let {
@@ -47,7 +47,7 @@ data class MessageWrapper(
 
 	fun asCaption(): String = "`#$author` ||$signature||"
 
-	fun getReplyId(): Long? = referencedTextRaw?.takeIf {
+	fun getReplyId(): Long? = referenceRaw?.takeIf {
 		it.contains(signatureStart)
 	}?.substringAfter(signatureStart)?.decode()
 
