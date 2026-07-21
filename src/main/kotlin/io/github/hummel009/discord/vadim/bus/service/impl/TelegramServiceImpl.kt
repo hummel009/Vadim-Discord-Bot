@@ -75,7 +75,8 @@ class TelegramServiceImpl : TelegramService {
 
 				val fileBytes = downloadWithLimit(animation.fileId, animation.fileSize)
 				val wrapper = fileBytes?.let {
-					FileWrapper(it, "gif", FileType.GIF, update.message.hasMediaSpoiler)
+					// Telegram stores gifs in mp4 format
+					FileWrapper(it, "mp4", FileType.GIF, update.message.hasMediaSpoiler)
 				}
 				fileWrappers.add(wrapper)
 			}
