@@ -9,15 +9,17 @@ data class MessageWrapper(
 	private val signatureRaw: String,
 	private val fileWrappersRaw: List<FileWrapper?>,
 ) {
-	private val signatureStart: String = "औ"
-	private val signatureAlphabet: String = "इईउऊऋएऐकखगघङचछजझञटठडढणतदनपफब"
+	companion object {
+		private const val SIGNATURE_START: String = "औ"
+		private const val SIGNATURE_ALPHABET: String = "इईउऊऋएऐकखगघङचछजझञटठडढणतदनपफब"
+	}
 
 	private val author: String = with(authorRaw) {
 		replace("  ", " ").replace(" ", "_")
 	}
 
 	private val replyQuote: String? = referenceRaw?.takeIf {
-		!it.contains(signatureStart)
+		!it.contains(SIGNATURE_START)
 	}?.let { text ->
 		val quote = text.replace("\n", " ").take(32).let {
 			if (text.length > 32) "$it..." else it
@@ -38,7 +40,7 @@ data class MessageWrapper(
 	}
 
 	private val signature: String = run {
-		"$signatureStart${signatureRaw.toLong().encode()}"
+		"$SIGNATURE_START${signatureRaw.toLong().encode()}"
 	}
 
 	fun isCaption(): Boolean = replyQuote == null && text.isBlank()
@@ -48,8 +50,8 @@ data class MessageWrapper(
 	fun asCaption(): String = "`#$author` ||$signature||"
 
 	fun getReplyId(): Long? = referenceRaw?.takeIf {
-		it.contains(signatureStart)
-	}?.substringAfter(signatureStart)?.decode()
+		it.contains(SIGNATURE_START)
+	}?.substringAfter(SIGNATURE_START)?.decode()
 
 	fun getFileWrappers(): List<FileWrapper> = run {
 		val fileWrappersSorted = fileWrappersRaw.filterNotNull().sortedBy {
@@ -82,11 +84,11 @@ data class MessageWrapper(
 	}
 
 	private fun Long.encode(): String {
-		val base = signatureAlphabet.length
-		val minus = signatureAlphabet.last()
+		val base = SIGNATURE_ALPHABET.length
+		val minus = SIGNATURE_ALPHABET.last()
 
 		if (this == 0L) {
-			return "${signatureAlphabet[0]}"
+			return "${SIGNATURE_ALPHABET[0]}"
 		}
 		var number = this
 		val negative = number < 0
@@ -97,7 +99,7 @@ data class MessageWrapper(
 		val sb = StringBuilder()
 		while (number > 0) {
 			val rem = (number % base).toInt()
-			sb.append(signatureAlphabet[rem])
+			sb.append(SIGNATURE_ALPHABET[rem])
 			number /= base
 		}
 		if (negative) {
@@ -107,8 +109,8 @@ data class MessageWrapper(
 	}
 
 	private fun String.decode(): Long {
-		val base = signatureAlphabet.length
-		val minus = signatureAlphabet.last()
+		val base = SIGNATURE_ALPHABET.length
+		val minus = SIGNATURE_ALPHABET.last()
 
 		if (isEmpty()) {
 			return 0
@@ -122,7 +124,7 @@ data class MessageWrapper(
 
 		var result = 0L
 		for (ch in str) {
-			val index = signatureAlphabet.indexOf(ch)
+			val index = SIGNATURE_ALPHABET.indexOf(ch)
 			if (index == -1) {
 				return 0
 			}
