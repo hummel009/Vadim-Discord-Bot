@@ -32,7 +32,7 @@ class DiscordServiceImpl : DiscordService {
 				listOf("png", "jpg", "jpeg", "webp", "svg", "tiff").any {
 					fileExtension?.lowercase() == it
 				} -> {
-					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
+					val fileBytes = downloadWithLimit(attachment.url, attachment.size)
 					val wrapper = fileBytes?.let {
 						FileWrapper(it, fileExtension, FileType.PHOTO, attachment.isSpoiler)
 					}
@@ -42,7 +42,7 @@ class DiscordServiceImpl : DiscordService {
 				listOf("mp4", "mpg", "mpeg", "webm", "mov", "avi").any {
 					fileExtension?.lowercase() == it
 				} -> {
-					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
+					val fileBytes = downloadWithLimit(attachment.url, attachment.size)
 					val wrapper = fileBytes?.let {
 						FileWrapper(it, fileExtension, FileType.VIDEO, attachment.isSpoiler)
 					}
@@ -52,7 +52,7 @@ class DiscordServiceImpl : DiscordService {
 				listOf("mp3").any {
 					fileExtension?.lowercase() == it
 				} -> {
-					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
+					val fileBytes = downloadWithLimit(attachment.url, attachment.size)
 					val wrapper = fileBytes?.let {
 						FileWrapper(it, fileExtension, FileType.AUDIO, attachment.isSpoiler)
 					}
@@ -62,7 +62,7 @@ class DiscordServiceImpl : DiscordService {
 				listOf("ogg").any {
 					fileExtension?.lowercase() == it
 				} -> {
-					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
+					val fileBytes = downloadWithLimit(attachment.url, attachment.size)
 					val wrapper = fileBytes?.let {
 						FileWrapper(it, fileExtension, FileType.VOICE, attachment.isSpoiler)
 					}
@@ -72,7 +72,7 @@ class DiscordServiceImpl : DiscordService {
 				listOf("gif").any {
 					fileExtension?.lowercase() == it
 				} -> {
-					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
+					val fileBytes = downloadWithLimit(attachment.url, attachment.size)
 					val wrapper = fileBytes?.let {
 						FileWrapper(it, fileExtension, FileType.GIF, attachment.isSpoiler)
 					}
@@ -80,7 +80,7 @@ class DiscordServiceImpl : DiscordService {
 				}
 
 				else -> {
-					val fileBytes = downloadWithLimit(attachment.proxyUrl, attachment.size)
+					val fileBytes = downloadWithLimit(attachment.url, attachment.size)
 					val wrapper = fileBytes?.let {
 						FileWrapper(it, fileExtension, FileType.DOC, attachment.isSpoiler)
 					}
