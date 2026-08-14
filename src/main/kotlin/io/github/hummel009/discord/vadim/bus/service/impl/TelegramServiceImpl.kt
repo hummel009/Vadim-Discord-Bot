@@ -26,7 +26,7 @@ class TelegramServiceImpl : TelegramService {
 		fun downloadWithLimit(id: String, size: Long): ByteArray? {
 			val url = ApiHolder.telegram.execute(GetFile(id)).getFileUrl(config.telegramToken)
 
-			return URI(url).takeIf { size <= 9_999_999 }?.toURL()?.readBytes()
+			return URI(url).takeIf { size <= 19_999_999 }?.toURL()?.readBytes()
 		}
 
 		when {
