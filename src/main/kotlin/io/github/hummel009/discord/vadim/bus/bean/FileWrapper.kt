@@ -23,7 +23,7 @@ data class FileWrapper(
 		return runCatching {
 			fileDao.getFile(tempFilePath).outputStream().buffered().use { output ->
 				fileStream.buffered().use { input ->
-					input.copyTo(output, 8192)
+					input.copyTo(output, 1024 * 1024) // 1 МБ
 				}
 			}
 			tempFilePath
