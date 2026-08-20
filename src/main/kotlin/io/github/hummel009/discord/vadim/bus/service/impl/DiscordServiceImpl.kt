@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import org.telegram.telegrambots.meta.api.methods.ParseMode
 import org.telegram.telegrambots.meta.api.methods.send.*
 import org.telegram.telegrambots.meta.api.objects.InputFile
+import java.io.InputStream
 import java.net.URI
 
 class DiscordServiceImpl : DiscordService {
@@ -22,8 +23,12 @@ class DiscordServiceImpl : DiscordService {
 	override fun receive(event: MessageReceivedEvent): MessageWrapper {
 		val fileWrappers = mutableListOf<FileWrapper?>()
 
-		fun downloadWithLimit(url: String, size: Int): ByteArray? =
-			URI(url).takeIf { size <= 19_999_999 }?.toURL()?.readBytes()
+		fun openLimitedStream(url: String, size: Int): InputStream? =
+			size.takeIf { it <= 19_999_999 }?.let {
+				runCatching {
+					URI(url).toURL().openStream()
+				}.getOrNull()
+			}
 
 		for (attachment in event.message.attachments) {
 			val fileExtension = attachment.fileExtension?.lowercase()
@@ -32,8 +37,8 @@ class DiscordServiceImpl : DiscordService {
 				listOf("png", "jpg", "jpeg", "webp", "svg", "tiff").any {
 					fileExtension?.lowercase() == it
 				} -> {
-					val fileBytes = downloadWithLimit(attachment.url, attachment.size)
-					val wrapper = fileBytes?.let {
+					val stream = openLimitedStream(attachment.url, attachment.size)
+					val wrapper = stream?.let {
 						FileWrapper(it, fileExtension, FileType.PHOTO, attachment.isSpoiler)
 					}
 					fileWrappers.add(wrapper)
@@ -42,8 +47,8 @@ class DiscordServiceImpl : DiscordService {
 				listOf("mp4", "mpg", "mpeg", "webm", "mov", "avi").any {
 					fileExtension?.lowercase() == it
 				} -> {
-					val fileBytes = downloadWithLimit(attachment.url, attachment.size)
-					val wrapper = fileBytes?.let {
+					val stream = openLimitedStream(attachment.url, attachment.size)
+					val wrapper = stream?.let {
 						FileWrapper(it, fileExtension, FileType.VIDEO, attachment.isSpoiler)
 					}
 					fileWrappers.add(wrapper)
@@ -52,8 +57,8 @@ class DiscordServiceImpl : DiscordService {
 				listOf("mp3").any {
 					fileExtension?.lowercase() == it
 				} -> {
-					val fileBytes = downloadWithLimit(attachment.url, attachment.size)
-					val wrapper = fileBytes?.let {
+					val stream = openLimitedStream(attachment.url, attachment.size)
+					val wrapper = stream?.let {
 						FileWrapper(it, fileExtension, FileType.AUDIO, attachment.isSpoiler)
 					}
 					fileWrappers.add(wrapper)
@@ -62,8 +67,8 @@ class DiscordServiceImpl : DiscordService {
 				listOf("ogg").any {
 					fileExtension?.lowercase() == it
 				} -> {
-					val fileBytes = downloadWithLimit(attachment.url, attachment.size)
-					val wrapper = fileBytes?.let {
+					val stream = openLimitedStream(attachment.url, attachment.size)
+					val wrapper = stream?.let {
 						FileWrapper(it, fileExtension, FileType.VOICE, attachment.isSpoiler)
 					}
 					fileWrappers.add(wrapper)
@@ -72,16 +77,16 @@ class DiscordServiceImpl : DiscordService {
 				listOf("gif").any {
 					fileExtension?.lowercase() == it
 				} -> {
-					val fileBytes = downloadWithLimit(attachment.url, attachment.size)
-					val wrapper = fileBytes?.let {
+					val stream = openLimitedStream(attachment.url, attachment.size)
+					val wrapper = stream?.let {
 						FileWrapper(it, fileExtension, FileType.GIF, attachment.isSpoiler)
 					}
 					fileWrappers.add(wrapper)
 				}
 
 				else -> {
-					val fileBytes = downloadWithLimit(attachment.url, attachment.size)
-					val wrapper = fileBytes?.let {
+					val stream = openLimitedStream(attachment.url, attachment.size)
+					val wrapper = stream?.let {
 						FileWrapper(it, fileExtension, FileType.DOC, attachment.isSpoiler)
 					}
 					fileWrappers.add(wrapper)

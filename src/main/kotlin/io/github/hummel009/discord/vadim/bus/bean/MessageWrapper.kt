@@ -70,7 +70,7 @@ data class MessageWrapper(
 
 		if (hasNulls) {
 			val theOneNullWrapper = FileWrapper(
-				ByteArray(0), null, FileType.NULL, false
+				ByteArray(0).inputStream(), null, FileType.NULL, false
 			)
 			fileWrappersSorted + listOf(theOneNullWrapper)
 		} else {

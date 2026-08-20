@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.utils.FileUpload
 import org.telegram.telegrambots.meta.api.methods.GetFile
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
+import java.io.InputStream
 import java.net.URI
 
 class TelegramServiceImpl : TelegramService {
@@ -23,18 +24,20 @@ class TelegramServiceImpl : TelegramService {
 	override fun receive(update: Update): MessageWrapper {
 		val fileWrappers = mutableListOf<FileWrapper?>()
 
-		fun downloadWithLimit(id: String, size: Long): ByteArray? {
-			val url = ApiHolder.telegram.execute(GetFile(id)).getFileUrl(config.telegramToken)
-
-			return URI(url).takeIf { size <= 19_999_999 }?.toURL()?.readBytes()
-		}
+		fun openLimitedStream(fileId: String, size: Long): InputStream? =
+			size.takeIf { it <= 19_999_999 }?.let {
+				runCatching {
+					val url = ApiHolder.telegram.execute(GetFile(fileId)).getFileUrl(config.telegramToken)
+					URI(url).toURL().openStream()
+				}.getOrNull()
+			}
 
 		when {
 			update.message.photo != null -> {
 				val photo = update.message.photo.last()
 
-				val fileBytes = downloadWithLimit(photo.fileId, photo.fileSize.toLong())
-				val wrapper = fileBytes?.let {
+				val stream = openLimitedStream(photo.fileId, photo.fileSize.toLong())
+				val wrapper = stream?.let {
 					FileWrapper(it, "jpg", FileType.PHOTO, update.message.hasMediaSpoiler)
 				}
 				fileWrappers.add(wrapper)
@@ -43,8 +46,8 @@ class TelegramServiceImpl : TelegramService {
 			update.message.video != null -> {
 				val video = update.message.video
 
-				val fileBytes = downloadWithLimit(video.fileId, video.fileSize)
-				val wrapper = fileBytes?.let {
+				val stream = openLimitedStream(video.fileId, video.fileSize)
+				val wrapper = stream?.let {
 					FileWrapper(it, "mp4", FileType.VIDEO, update.message.hasMediaSpoiler)
 				}
 				fileWrappers.add(wrapper)
@@ -53,8 +56,8 @@ class TelegramServiceImpl : TelegramService {
 			update.message.audio != null -> {
 				val audio = update.message.audio
 
-				val fileBytes = downloadWithLimit(audio.fileId, audio.fileSize)
-				val wrapper = fileBytes?.let {
+				val stream = openLimitedStream(audio.fileId, audio.fileSize)
+				val wrapper = stream?.let {
 					FileWrapper(it, "mp3", FileType.AUDIO, update.message.hasMediaSpoiler)
 				}
 				fileWrappers.add(wrapper)
@@ -63,8 +66,8 @@ class TelegramServiceImpl : TelegramService {
 			update.message.voice != null -> {
 				val voice = update.message.voice
 
-				val fileBytes = downloadWithLimit(voice.fileId, voice.fileSize)
-				val wrapper = fileBytes?.let {
+				val stream = openLimitedStream(voice.fileId, voice.fileSize)
+				val wrapper = stream?.let {
 					FileWrapper(it, "ogg", FileType.VOICE, update.message.hasMediaSpoiler)
 				}
 				fileWrappers.add(wrapper)
@@ -73,8 +76,8 @@ class TelegramServiceImpl : TelegramService {
 			update.message.animation != null -> {
 				val animation = update.message.animation
 
-				val fileBytes = downloadWithLimit(animation.fileId, animation.fileSize)
-				val wrapper = fileBytes?.let {
+				val stream = openLimitedStream(animation.fileId, animation.fileSize)
+				val wrapper = stream?.let {
 					// Telegram stores gifs in mp4 format
 					FileWrapper(it, "mp4", FileType.GIF, update.message.hasMediaSpoiler)
 				}
@@ -84,8 +87,8 @@ class TelegramServiceImpl : TelegramService {
 			update.message.document != null -> {
 				val doc = update.message.document
 
-				val fileBytes = downloadWithLimit(doc.fileId, doc.fileSize)
-				val wrapper = fileBytes?.let {
+				val stream = openLimitedStream(doc.fileId, doc.fileSize)
+				val wrapper = stream?.let {
 					FileWrapper(it, doc.fileName.ext(), FileType.DOC, update.message.hasMediaSpoiler)
 				}
 				fileWrappers.add(wrapper)

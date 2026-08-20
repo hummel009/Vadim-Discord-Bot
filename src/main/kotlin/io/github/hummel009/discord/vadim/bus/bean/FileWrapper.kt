@@ -3,9 +3,10 @@ package io.github.hummel009.discord.vadim.bus.bean
 import io.github.hummel009.discord.vadim.bus.utils.FileType
 import io.github.hummel009.discord.vadim.dao.FileDao
 import io.github.hummel009.discord.vadim.factory.DaoFactory
+import java.io.InputStream
 
 data class FileWrapper(
-	private val fileBytes: ByteArray,
+	private val fileStream: InputStream,
 	private val fileExtension: String?,
 	val fileType: FileType,
 	val isSpoiler: Boolean?,
@@ -14,17 +15,41 @@ data class FileWrapper(
 
 	fun allocateWithPath(): String {
 		val tempFolderPath = "temp"
-		val tempFilePath = "temp/${System.currentTimeMillis()}.$fileExtension"
+		val tempFilePath = "temp/${System.currentTimeMillis()}.${fileExtension ?: "tmp"}"
 
 		fileDao.createEmptyFolder(tempFolderPath)
 		fileDao.createEmptyFile(tempFilePath)
-		fileDao.writeToFile(tempFilePath, fileBytes)
 
-		return tempFilePath
+		return runCatching {
+			fileDao.getFile(tempFilePath).outputStream().buffered().use { output ->
+				fileStream.buffered().use { input ->
+					input.copyTo(output, 8192)
+				}
+			}
+			tempFilePath
+		}.onFailure { e ->
+			e.printStackTrace()
+
+			runCatching {
+				fileDao.removeFile(tempFilePath)
+			}
+		}.getOrElse {
+			throw RuntimeException("Failed to allocate file", it)
+		}
 	}
 
 	fun freeWithPath(tempFilePath: String) {
-		fileDao.removeFile(tempFilePath)
+		runCatching {
+			fileDao.removeFile(tempFilePath)
+		}.onFailure { e ->
+			e.printStackTrace()
+
+			runCatching {
+				fileDao.removeFile(tempFilePath)
+			}
+		}.getOrElse {
+			throw RuntimeException("Failed to allocate file", it)
+		}
 	}
 
 	override fun equals(other: Any?): Boolean {
@@ -34,7 +59,7 @@ data class FileWrapper(
 		other as FileWrapper
 
 		if (isSpoiler != other.isSpoiler) return false
-		if (!fileBytes.contentEquals(other.fileBytes)) return false
+		if (fileStream != other.fileStream) return false
 		if (fileExtension != other.fileExtension) return false
 		if (fileType != other.fileType) return false
 		if (fileDao != other.fileDao) return false
@@ -44,7 +69,7 @@ data class FileWrapper(
 
 	override fun hashCode(): Int {
 		var result = isSpoiler?.hashCode() ?: 0
-		result = 31 * result + fileBytes.contentHashCode()
+		result = 31 * result + fileStream.hashCode()
 		result = 31 * result + (fileExtension?.hashCode() ?: 0)
 		result = 31 * result + fileType.hashCode()
 		result = 31 * result + fileDao.hashCode()
