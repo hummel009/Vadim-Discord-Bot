@@ -25,7 +25,7 @@ class TelegramServiceImpl : TelegramService {
 		val fileWrappers = mutableListOf<FileWrapper?>()
 
 		fun openLimitedStream(fileId: String, size: Long): InputStream? =
-			size.takeIf { it <= 19_999_999 }?.let {
+			size.takeIf { it <= 9_999_999 }?.let {
 				runCatching {
 					val url = ApiHolder.telegram.execute(GetFile(fileId)).getFileUrl(config.telegramToken)
 					URI(url).toURL().openStream()

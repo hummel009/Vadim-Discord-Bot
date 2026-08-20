@@ -24,7 +24,7 @@ class DiscordServiceImpl : DiscordService {
 		val fileWrappers = mutableListOf<FileWrapper?>()
 
 		fun openLimitedStream(url: String, size: Int): InputStream? =
-			size.takeIf { it <= 19_999_999 }?.let {
+			size.takeIf { it <= 9_999_999 }?.let {
 				runCatching {
 					URI(url).toURL().openStream()
 				}.getOrNull()
