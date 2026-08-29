@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import org.telegram.telegrambots.meta.api.methods.ParseMode
 import org.telegram.telegrambots.meta.api.methods.send.*
 import org.telegram.telegrambots.meta.api.objects.InputFile
+import org.telegram.telegrambots.meta.api.objects.ReplyParameters
 import java.io.InputStream
 import java.net.URI
 
@@ -112,7 +113,11 @@ class DiscordServiceImpl : DiscordService {
 				text(m.asMessage())
 				parseMode(ParseMode.MARKDOWNV2)
 				m.getReplyId()?.let {
-					replyToMessageId(it.toInt())
+					replyParameters(
+						ReplyParameters.builder().apply {
+							messageId(it.toInt())
+						}.build()
+					)
 				}
 			}.build())
 		}
